@@ -1,0 +1,333 @@
+@model AspNetMvcApp.Models.OrderReceiptViewModel
+@{
+    ViewData["Title"] = "Đặt Hàng Thành Công - Viễn Thông Gia Trí";
+}
+
+<style>
+    /* ═══ PREMIUM SUCCESS STYLES ═══ */
+    .success-container {
+        background: var(--bg-dark-card);
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-xl);
+        padding: 3rem;
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        box-shadow: var(--shadow-card);
+        margin-bottom: 3rem;
+        text-align: center;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .success-glow {
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        top: -150px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 65%);
+        pointer-events: none;
+    }
+
+    /* Success Icon Checkmark Animation */
+    .success-icon-wrapper {
+        width: 84px;
+        height: 84px;
+        border-radius: 50%;
+        background: rgba(16, 185, 129, 0.08);
+        border: 2px solid rgba(16, 185, 129, 0.25);
+        color: #10b981;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+        animation: successPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @@keyframes successPop {
+        0% { transform: scale(0.5); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .success-title {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 2rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .success-desc {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        max-width: 520px;
+        margin: 0 auto 2.5rem auto;
+        line-height: 1.6;
+    }
+
+    /* Receipt Card */
+    .receipt-card {
+        background: rgba(13, 33, 55, 0.3);
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        text-align: left;
+        margin-bottom: 2rem;
+    }
+
+    body.theme-light .receipt-card {
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .receipt-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px dashed var(--border-light);
+        padding-bottom: 1rem;
+        margin-bottom: 1.25rem;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .receipt-id-box {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .receipt-id-label {
+        font-size: 0.68rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .receipt-id {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #00b4ff;
+    }
+
+    .receipt-date {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .receipt-section-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        margin-bottom: 0.85rem;
+        border-left: 3px solid #00b4ff;
+        padding-left: 0.5rem;
+    }
+
+    .receipt-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.75rem;
+    }
+
+    @@media (max-width: 576px) {
+        .receipt-info-grid {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+    }
+
+    .receipt-info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+
+    .receipt-info-label {
+        font-size: 0.74rem;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    .receipt-info-value {
+        font-size: 0.88rem;
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    /* Items Table inside Receipt */
+    .receipt-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.5rem;
+        font-size: 0.85rem;
+    }
+
+    .receipt-table th {
+        padding: 0.65rem 0;
+        color: var(--text-muted);
+        font-weight: 600;
+        border-bottom: 1px solid var(--border-light);
+        text-align: left;
+    }
+
+    .receipt-table td {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        color: var(--text-primary);
+    }
+
+    body.theme-light .receipt-table td {
+        border-bottom-color: rgba(13, 33, 55, 0.04);
+    }
+
+    .receipt-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .receipt-totals {
+        border-top: 1px solid var(--border-light);
+        padding-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-end;
+    }
+
+    .receipt-total-row {
+        display: flex;
+        justify-content: space-between;
+        width: 260px;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .receipt-total-row.grand-total {
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 0.95rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        padding-top: 0.5rem;
+        margin-top: 0.25rem;
+    }
+
+    body.theme-light .receipt-total-row.grand-total {
+        border-top-color: rgba(13, 33, 55, 0.06);
+    }
+
+    .receipt-grand-total-val {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #00b4ff;
+    }
+</style>
+
+<div class="success-container">
+    <div class="success-glow"></div>
+
+    <div class="success-icon-wrapper">
+        <i class="fa-solid fa-circle-check"></i>
+    </div>
+
+    <h1 class="success-title">Đặt Hàng Thành Công!</h1>
+    <p class="success-desc">
+        Cảm ơn bạn đã lựa chọn mua sắm thiết bị viễn thông chính hãng tại Gia Trí. Chúng tôi sẽ nhanh chóng xử lý đơn hàng và liên hệ trực tiếp với bạn qua điện thoại trong vòng 15-30 phút để xác nhận lịch giao nhận.
+    </p>
+
+    <!-- Receipt -->
+    <div class="receipt-card">
+        <div class="receipt-header">
+            <div class="receipt-id-box">
+                <span class="receipt-id-label">Mã đơn hàng của bạn</span>
+                <span class="receipt-id">@Model.OrderId</span>
+            </div>
+            <div class="receipt-date">
+                <i class="fa-regular fa-calendar-check me-1"></i> Ngày đặt: @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")
+            </div>
+        </div>
+
+        <h3 class="receipt-section-title">Thông tin giao nhận</h3>
+        <div class="receipt-info-grid">
+            <div class="receipt-info-item">
+                <span class="receipt-info-label">Người nhận hàng</span>
+                <span class="receipt-info-value">@Model.FullName</span>
+            </div>
+            <div class="receipt-info-item">
+                <span class="receipt-info-label">Số điện thoại</span>
+                <span class="receipt-info-value">@Model.Phone</span>
+            </div>
+            <div class="receipt-info-item" style="grid-column: span 2;">
+                <span class="receipt-info-label">Địa chỉ giao nhận</span>
+                <span class="receipt-info-value">@Model.Address</span>
+            </div>
+            <div class="receipt-info-item">
+                <span class="receipt-info-label">Phương thức thanh toán</span>
+                <span class="receipt-info-value">@Model.PaymentMethod</span>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.Notes))
+            {
+                <div class="receipt-info-item">
+                    <span class="receipt-info-label">Ghi chú đơn hàng</span>
+                    <span class="receipt-info-value" style="font-weight: 500; font-style: italic;">@Model.Notes</span>
+                </div>
+            }
+        </div>
+
+        <h3 class="receipt-section-title">Chi tiết mặt hàng đặt mua</h3>
+        <table class="receipt-table">
+            <thead>
+                <tr>
+                    <th style="width: 60%;">Sản Phẩm</th>
+                    <th style="width: 15%; text-align: center;">SL</th>
+                    <th style="width: 25%; text-align: right;">Thành Tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td style="font-weight: 600;">@item.Name</td>
+                        <td style="text-align: center; color: var(--text-secondary);">@item.Quantity</td>
+                        <td style="text-align: right; font-weight: 700;">@((item.TotalPrice * 25000).ToString("#,##0")) đ</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="receipt-totals">
+            <div class="receipt-total-row">
+                <span>Tạm tính:</span>
+                <span>@((Model.TotalAmount * 25000).ToString("#,##0")) đ</span>
+            </div>
+            <div class="receipt-total-row">
+                <span>Phí vận chuyển:</span>
+                <span class="text-success fw-600">Miễn phí</span>
+            </div>
+            <div class="receipt-total-row grand-total">
+                <span>Tổng thanh toán:</span>
+                <span class="receipt-grand-total-val">@((Model.TotalAmount * 25000).ToString("#,##0")) đ</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="d-flex gap-3 justify-content-center">
+        <a href="@Url.Action("Index", "Products")" class="btn-primary-custom" style="padding: 0.75rem 2rem; text-decoration: none;">
+            <i class="fa-solid fa-store"></i> Tiếp Tục Mua Sắm
+        </a>
+        <a href="tel:0317656136" class="btn-secondary-custom" style="padding: 0.75rem 2rem;">
+            <i class="fa-solid fa-headset"></i> Hotline Hỗ Trợ
+        </a>
+    </div>
+</div>

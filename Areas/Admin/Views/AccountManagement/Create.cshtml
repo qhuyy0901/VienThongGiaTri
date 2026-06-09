@@ -1,0 +1,182 @@
+@model AspNetMvcApp.Models.CreateUserViewModel
+@{
+    ViewData["Title"] = "Thêm Tài Khoản";
+}
+
+<style>
+    .form-page-header {
+        margin-bottom: 2rem;
+    }
+
+    .form-page-header h1 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .form-page-header p {
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+    }
+
+    .form-card {
+        background: var(--bg-dark-card);
+        border: 1px solid var(--border-light);
+        border-radius: 20px;
+        padding: 2rem;
+        max-width: 600px;
+        backdrop-filter: var(--glass-blur);
+    }
+
+    .form-group {
+        margin-bottom: 1.35rem;
+    }
+
+    .form-label {
+        display: block;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 0.4rem;
+    }
+
+    .form-control-custom {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-light);
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        outline: none;
+        transition: var(--transition-normal);
+    }
+
+    .form-control-custom:focus {
+        border-color: rgba(59, 130, 246, 0.5);
+        background: rgba(255, 255, 255, 0.06);
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.12);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1.75rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--border-light);
+    }
+
+    .btn-submit {
+        background: var(--grad-primary);
+        border: none;
+        color: #fff;
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        font-family: 'Outfit', sans-serif;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: var(--transition-fast);
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-cancel {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border-light);
+        color: var(--text-primary);
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        font-family: 'Outfit', sans-serif;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: var(--transition-fast);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text-primary);
+    }
+
+    .validation-error {
+        color: #ef4444;
+        font-size: 0.78rem;
+        margin-top: 0.3rem;
+        display: block;
+    }
+
+    .select-custom {
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml;utf8,<svg fill='%238ba3c1' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px;
+        padding-right: 2.5rem;
+    }
+
+    .select-custom option {
+        background: #0d2137;
+        color: #f0f6fc;
+    }
+</style>
+
+<div class="form-page-header">
+    <h1><i class="fa-solid fa-user-plus" style="color: var(--accent-emerald);"></i> Thêm Tài Khoản Mới</h1>
+    <p>Nhập địa chỉ email và mật khẩu để tạo mới một tài khoản trên hệ thống.</p>
+</div>
+
+<div class="form-card">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3" style="font-size: 0.85rem;"></div>
+
+        <div class="form-group">
+            <label asp-for="Email" class="form-label">Địa Chỉ Email (Tên đăng nhập)</label>
+            <input asp-for="Email" class="form-control-custom" placeholder="VD: nguyenvana@huy.com" required autocomplete="off" />
+            <span asp-validation-for="Email" class="validation-error"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Password" class="form-label">Mật Khẩu Khởi Tạo</label>
+            <input asp-for="Password" class="form-control-custom" placeholder="Nhập mật khẩu ít nhất 6 ký tự" required autocomplete="new-password" />
+            <span asp-validation-for="Password" class="validation-error"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Role" class="form-label">Vai Trò Hệ Thống</label>
+            <select asp-for="Role" class="form-control-custom select-custom">
+                <option value="User">User (Khách hàng thông thường)</option>
+                <option value="Admin">Admin (Quản trị viên hệ thống)</option>
+            </select>
+            <span asp-validation-for="Role" class="validation-error"></span>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">
+                <i class="fa-solid fa-check"></i> Lưu Tài Khoản
+            </button>
+            <a asp-action="Index" class="btn-cancel">
+                <i class="fa-solid fa-xmark"></i> Hủy
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

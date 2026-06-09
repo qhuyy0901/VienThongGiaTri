@@ -1,0 +1,1492 @@
+@model AspNetMvcApp.Models.ProductDetailsViewModel
+@{
+    // Dynamic brand detection
+    string name = Model.Product.Name;
+    string manufacturerName = "Viễn Thông Gia Trí";
+    string brandDesc = "Viễn Thông Gia Trí là đối tác và nhà phân phối chiến lược của các hãng thiết bị mạng, camera an ninh hàng đầu thế giới. Chúng tôi mang đến giải pháp mạng tin cậy cho doanh nghiệp và gia đình.";
+    
+    if (name.Contains("Hikvision", StringComparison.OrdinalIgnoreCase))
+    {
+        manufacturerName = "Hikvision";
+        brandDesc = "Hikvision là nhà sản xuất thiết bị giám sát an ninh lớn nhất thế giới, cung cấp các giải pháp IoT, camera IP và công nghệ video hàng đầu thế giới, nổi tiếng thế giới về độ bền và chất lượng hình ảnh.";
+    }
+    else if (name.Contains("Imou", StringComparison.OrdinalIgnoreCase))
+    {
+        manufacturerName = "Imou";
+        brandDesc = "Imou là thương hiệu con trực thuộc Dahua Technology của Trung Quốc, chuyên sản xuất các dòng camera thông minh, chuông cửa, khóa vân tay và smarthome cao cấp, thân thiện và dễ cài đặt.";
+    }
+    else if (name.Contains("Ezviz", StringComparison.OrdinalIgnoreCase))
+    {
+        manufacturerName = "EZVIZ";
+        brandDesc = "EZVIZ là thương hiệu toàn cầu chuyên về camera an ninh thông minh và giải pháp nhà thông minh, mang đến trải nghiệm sống an tâm thông qua dịch vụ đám mây tiên tiến và thuật toán trí tuệ nhân tạo (AI).";
+    }
+    else if (name.Contains("Cisco", StringComparison.OrdinalIgnoreCase))
+    {
+        manufacturerName = "Cisco";
+        brandDesc = "Cisco Systems là tập đoàn công nghệ mạng đa quốc gia hàng đầu thế giới của Mỹ, cung cấp hạ tầng Internet, thiết bị định tuyến Router và Switch mạng lõi cấp doanh nghiệp tiêu chuẩn công nghiệp cực cao.";
+    }
+    else if (name.Contains("Ruijie", StringComparison.OrdinalIgnoreCase) || name.Contains("Reyee", StringComparison.OrdinalIgnoreCase))
+    {
+        manufacturerName = "Ruijie Reyee";
+        brandDesc = "Ruijie Networks là nhà cung cấp thiết bị mạng doanh nghiệp hàng đầu thế giới, nổi tiếng với dải sản phẩm Reyee gồm Wi-Fi 6, Switch PoE, Gateway được tối ưu hóa cho quản lý Cloud miễn phí trọn đời.";
+    }
+    else if (name.Contains("TP-Link", StringComparison.OrdinalIgnoreCase))
+    {
+        manufacturerName = "TP-Link";
+        brandDesc = "TP-Link là nhà cung cấp thiết bị mạng tiêu dùng và SOHO số 1 toàn cầu, chuyên mang đến các sản phẩm Wi-Fi, Switch, bộ phát 4G/5G có chất lượng ổn định, hiệu năng vượt trội trên tầm giá.";
+    }
+    else if (name.Contains("CommScope", StringComparison.OrdinalIgnoreCase))
+    {
+        manufacturerName = "CommScope";
+        brandDesc = "CommScope là nhà sản xuất hạ tầng viễn thông hàng đầu nước Mỹ, nổi tiếng với các sản phẩm cáp mạng Cat5e, Cat6 AMP chính hãng có khả năng truyền dẫn tín hiệu xuất sắc và độ bền trọn đời.";
+    }
+
+    // Dynamic price calculation
+    decimal originalPrice = Math.Round(Model.Product.Price * 1.85m);
+    int discountPercent = 46;
+
+    // Dynamic checklist based on SQL database specifications
+    var specsChecklist = new List<string>();
+    
+    if (Model.Product.ProductSpecifications != null && Model.Product.ProductSpecifications.Any())
+    {
+        var dbChecklist = Model.Product.ProductSpecifications
+            .OrderBy(s => s.DisplayOrder)
+            .Where(s => s.Name != "Thương hiệu" && s.Name != "Xuất xứ thương hiệu" && s.Name != "Chế độ bảo hành")
+            .Take(6)
+            .Select(s => $"{s.Name}: {s.Value}")
+            .ToList();
+            
+        specsChecklist.AddRange(dbChecklist);
+    }
+    
+    // Fallback to static checklist if no specifications are loaded in the database
+    if (specsChecklist.Count == 0)
+    {
+        string catName = Model.Product.Category?.Name ?? "General";
+        
+        if (catName.Contains("Camera", StringComparison.OrdinalIgnoreCase))
+        {
+            specsChecklist = new List<string> {
+                "Độ phân giải siêu sắc nét, góc quan sát cực rộng",
+                "Hồng ngoại tầm xa ban đêm thông minh sắc nét",
+                "Tính năng phát hiện chuyển động AI thông minh mới",
+                "Đàm thoại 2 chiều với mic và loa lọc tiếng ồn tốt",
+                "Hỗ trợ ghi âm chất lượng cao, chuẩn nén H.265 tiết kiệm",
+                "Lưu trữ đám mây hoặc thẻ nhớ mở rộng tối đa tới 256GB"
+            };
+        }
+        else if (catName.Contains("Switch", StringComparison.OrdinalIgnoreCase))
+        {
+            specsChecklist = new List<string> {
+                "Cổng mạng tốc độ cao (Gigabit Ethernet) ổn định",
+                "Vỏ kim loại bền bỉ, tản nhiệt cực tốt không quạt",
+                "Công nghệ tiết kiệm điện năng tiêu thụ thông minh tiên tiến",
+                "Cắm là chạy (Plug & Play), không cần cấu hình phức tạp",
+                "Băng thông chuyển mạch lớn, bảo vệ chống sét lan truyền",
+                "Hỗ trợ tính năng kiểm soát luồng và tự động nhận diện tốc độ"
+            };
+        }
+        else
+        {
+            specsChecklist = new List<string> {
+                "Wi-Fi thế hệ mới băng thông cực lớn và vô cùng ổn định",
+                "Khả năng chịu tải cực cao, kết nối nhiều thiết bị cùng lúc",
+                "Phủ sóng rộng rãi, tăng cường khả năng đâm xuyên tường",
+                "Bảo mật bảo vệ WPA3 nâng cao mới nhất hiện nay",
+                "Thiết lập, cấu hình và quản lý từ xa cực dễ qua app điện thoại",
+                "Linh kiện cao cấp bảo đảm độ bền bỉ khi hoạt động 24/7"
+            };
+        }
+    }
+
+    // Specs table parameters
+    var specParams = new Dictionary<string, string>();
+    specParams.Add("Thương hiệu", manufacturerName);
+    specParams.Add("Xuất xứ thương hiệu", "Chính hãng nhập khẩu");
+    specParams.Add("Chế độ bảo hành", "24 tháng chính hãng");
+    
+    string catNameForFallback = Model.Product.Category?.Name ?? "General";
+    if (catNameForFallback.Contains("Camera", StringComparison.OrdinalIgnoreCase))
+    {
+        specParams.Add("Độ phân giải", "5.0 Megapixel (hoặc 2.0MP tùy phiên bản)");
+        specParams.Add("Chuẩn nén video", "H.265 / H.264 thông minh");
+        specParams.Add("Tầm xa quan sát", "Hồng ngoại thông minh xa tới 20m - 30m");
+        specParams.Add("Lưu trữ hỗ trợ", "Khe cắm MicroSD tối đa 256GB / Cloud Storage");
+        specParams.Add("Nguồn điện cung cấp", "DC 5V/1A hoặc 12V/1A kèm củ nguồn");
+        specParams.Add("Tính năng nổi bật", "Báo động AI phát hiện chuyển động, Đàm thoại 2 chiều");
+    }
+    else if (catNameForFallback.Contains("Switch", StringComparison.OrdinalIgnoreCase))
+    {
+        specParams.Add("Số cổng kết nối", "5 Cổng / 8 Cổng / 24 Cổng (tùy mã chọn mua)");
+        specParams.Add("Tốc độ truyền dữ liệu", "10/100/1000 Mbps Gigabit Ethernet");
+        specParams.Add("Băng thông chuyển mạch", "1.6 Gbps - 48 Gbps siêu tốc");
+        specParams.Add("Chất liệu vỏ máy", "Kim loại sơn tĩnh điện chống rỉ sét");
+        specParams.Add("Tiêu chuẩn mạng", "IEEE 802.3, 802.3u, 802.3ab, 802.3x");
+        specParams.Add("Đèn hiển thị LED", "Đèn báo nguồn Link/Act hoạt động trực quan");
+    }
+    else
+    {
+        specParams.Add("Tốc độ không dây", "300 Mbps - 1800 Mbps truyền tải cao");
+        specParams.Add("Băng tần hoạt động", "Băng tần kép 2.4GHz & 5GHz chống nhiễu");
+        specParams.Add("Số lượng Ăng-ten", "Ăng-ten ngoài hiệu suất cao định hướng");
+        specParams.Add("Số lượng kết nối", "Hỗ trợ kết nối đồng thời ổn định lên tới 64 thiết bị");
+        specParams.Add("Chuẩn bảo mật", "WPA, WPA2, WPA3 bảo mật tuyệt đối");
+        specParams.Add("Cổng giao tiếp", "1 Cổng WAN, 3 Cổng LAN RJ45");
+    }
+    
+    ViewData["Title"] = Model.Product.Name;
+}
+
+<style>
+    /* ═══ DETAILS CONTAINER ═══ */
+    .details-container {
+        background: var(--bg-dark-card);
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-xl);
+        padding: 2.5rem;
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        box-shadow: var(--shadow-card);
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .details-glow {
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        top: -200px;
+        right: -200px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(0, 180, 255, 0.08) 0%, transparent 65%);
+        pointer-events: none;
+    }
+
+    .details-glow-2 {
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        bottom: -150px;
+        left: -100px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(0, 118, 247, 0.06) 0%, transparent 65%);
+        pointer-events: none;
+    }
+
+    /* Redesigned 3-column grid */
+    .details-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.25fr 0.85fr;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    @@media (max-width: 1200px) {
+        .details-grid { grid-template-columns: 1.1fr 1.3fr; gap: 2rem; }
+        .details-sidebar { grid-column: span 2; display: grid !important; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    }
+
+    @@media (max-width: 992px) {
+        .details-grid { grid-template-columns: 1fr; gap: 2rem; }
+        .details-sidebar { grid-column: span 1; grid-template-columns: 1fr; }
+        .details-container { padding: 1.5rem; }
+    }
+
+    /* ── Image Gallery ── */
+    .details-left-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        width: 100%;
+    }
+
+    .details-image-box {
+        background: linear-gradient(145deg, rgba(13, 33, 55, 0.3), rgba(7, 21, 37, 0.5));
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 350px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    body.theme-light .details-image-box {
+        background: linear-gradient(145deg, rgba(232, 244, 253, 0.5), rgba(240, 247, 255, 0.3));
+    }
+
+    @@media (max-width: 576px) {
+        .details-image-box { height: 260px; padding: 1rem; }
+    }
+
+    .details-image {
+        max-width: 92%;
+        max-height: 92%;
+        object-fit: contain;
+        filter: drop-shadow(0 16px 32px rgba(0, 0, 0, 0.3));
+        transition: opacity 0.25s ease, transform 0.25s ease, filter 0.25s ease;
+    }
+
+    .details-image.fade-out {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    .details-image-box:hover .details-image {
+        transform: scale(1.03);
+        filter: drop-shadow(0 20px 40px rgba(0, 118, 247, 0.2));
+    }
+
+    /* Diagonal Badge and Ribbon */
+    .discount-badge-diagonal {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: #ef4444;
+        color: #ffffff;
+        font-size: 0.85rem;
+        font-weight: 700;
+        padding: 0.4rem 0.9rem;
+        border-bottom-right-radius: 10px;
+        z-index: 5;
+        box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .ribbon-sale-corner {
+        position: absolute;
+        top: 15px;
+        right: -32px;
+        background: #f59e0b;
+        color: #ffffff;
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 0.2rem 2.5rem;
+        transform: rotate(45deg);
+        z-index: 5;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Thumbnails */
+    .details-thumbnails-row {
+        display: flex;
+        gap: 0.6rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        padding: 0.5rem;
+        background: rgba(0, 180, 255, 0.02);
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-md);
+    }
+
+    .details-thumbnail-item {
+        width: 64px;
+        height: 64px;
+        background: rgba(13, 33, 55, 0.25);
+        border: 1.5px solid var(--border-light);
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.35rem;
+        transition: var(--transition-fast);
+        position: relative;
+        overflow: hidden;
+    }
+
+    body.theme-light .details-thumbnail-item {
+        background: rgba(232, 244, 253, 0.5);
+    }
+
+    .details-thumbnail-item:hover {
+        transform: translateY(-2px) scale(1.02);
+        border-color: rgba(0, 180, 255, 0.35);
+    }
+
+    .details-thumbnail-item.active {
+        border-color: #00b4ff;
+        background: rgba(0, 180, 255, 0.08);
+        box-shadow: 0 0 10px rgba(0, 180, 255, 0.2);
+    }
+
+    .details-thumbnail-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        transition: transform 0.2s ease;
+    }
+
+    /* ── Details Info ── */
+    .details-info {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        align-items: center;
+    }
+
+    .details-cat-badge {
+        background: linear-gradient(135deg, rgba(0, 118, 247, 0.12), rgba(0, 180, 255, 0.08));
+        border: 1px solid rgba(0, 180, 255, 0.2);
+        color: #4dcfff;
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 0.35rem 0.9rem;
+        border-radius: var(--radius-pill);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        text-decoration: none;
+        transition: var(--transition-fast);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    body.theme-light .details-cat-badge {
+        color: #0076f7;
+        background: rgba(0, 118, 247, 0.08);
+    }
+
+    .details-cat-badge:hover {
+        background: rgba(0, 180, 255, 0.18);
+        color: #ffffff;
+    }
+
+    .details-stock-badge {
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 0.35rem 0.9rem;
+        border-radius: var(--radius-pill);
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .details-title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        font-family: 'Outfit', sans-serif;
+        line-height: 1.25;
+        margin: 0;
+    }
+
+    @@media (max-width: 576px) {
+        .details-title { font-size: 1.4rem; }
+    }
+
+    /* Quantity Selector UI */
+    .qty-selector-box {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-size: 0.88rem;
+        color: var(--text-secondary);
+    }
+
+    .qty-input-group {
+        display: flex;
+        align-items: center;
+        border: 1px solid var(--border-light);
+        border-radius: 6px;
+        overflow: hidden;
+        background: rgba(13, 33, 55, 0.1);
+    }
+
+    body.theme-light .qty-input-group {
+        background: rgba(0, 0, 0, 0.02);
+    }
+
+    .qty-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: transparent;
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s ease;
+    }
+
+    .qty-btn:hover {
+        background: rgba(0, 180, 255, 0.08);
+    }
+
+    .qty-input {
+        width: 44px;
+        height: 32px;
+        border: none;
+        border-left: 1px solid var(--border-light);
+        border-right: 1px solid var(--border-light);
+        background: transparent;
+        color: var(--text-primary);
+        text-align: center;
+        font-size: 0.88rem;
+        font-weight: 600;
+        outline: none;
+    }
+
+    /* Custom buttons mimicking vuhoangtelecom */
+    .btn-buy-now-custom {
+        flex: 1.2;
+        background: #ef4444;
+        color: #ffffff;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 700;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: var(--transition-normal);
+        box-shadow: 0 4px 18px rgba(239, 68, 68, 0.25);
+        font-family: 'Outfit', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .btn-buy-now-custom:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(239, 68, 68, 0.35);
+    }
+
+    .btn-consult-custom {
+        flex: 0.8;
+        background: #0076f7;
+        color: #ffffff;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 700;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: var(--transition-normal);
+        box-shadow: 0 4px 18px rgba(0, 118, 247, 0.25);
+        font-family: 'Outfit', sans-serif;
+        text-decoration: none !important;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .btn-consult-custom:hover {
+        background: #0063d1;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 118, 247, 0.35);
+    }
+
+    /* Orange Gift Card */
+    .gift-info-card {
+        background: rgba(245, 158, 11, 0.02);
+        border: 1px dashed rgba(245, 158, 11, 0.25);
+        border-radius: var(--radius-md);
+        padding: 0.85rem 1.15rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .gift-title-bar {
+        font-size: 0.82rem;
+        font-weight: 800;
+        color: #f59e0b;
+        margin-bottom: 0.4rem;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .gift-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .gift-item {
+        font-size: 0.76rem;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: flex-start;
+        gap: 0.4rem;
+        line-height: 1.4;
+    }
+
+    .gift-item i {
+        color: #f59e0b;
+        margin-top: 0.15rem;
+        font-size: 0.7rem;
+    }
+
+    .gift-badge-new {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: #f59e0b;
+        color: #ffffff;
+        font-size: 0.55rem;
+        font-weight: 800;
+        padding: 0.15rem 0.5rem;
+        border-bottom-left-radius: 6px;
+        text-transform: uppercase;
+    }
+
+    /* Right Sidebar Widgets */
+    .details-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+    }
+
+    .sidebar-widget {
+        background: rgba(13, 33, 55, 0.2);
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-md);
+        padding: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: all 0.2s ease;
+    }
+
+    body.theme-light .sidebar-widget {
+        background: rgba(232, 244, 253, 0.35);
+    }
+
+    .sidebar-widget:hover {
+        border-color: rgba(0, 180, 255, 0.2);
+        transform: translateY(-2px);
+        background: rgba(0, 180, 255, 0.02);
+    }
+
+    .widget-icon-box {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(0, 180, 255, 0.08);
+        border: 1px solid rgba(0, 180, 255, 0.15);
+        color: #00b4ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        flex-shrink: 0;
+    }
+
+    .widget-text-box {
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+    }
+
+    .widget-text-title {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .widget-text-desc {
+        font-size: 0.74rem;
+        color: var(--text-secondary);
+        line-height: 1.3;
+    }
+
+    .widget-link {
+        color: #00b4ff;
+        font-weight: 600;
+        text-decoration: underline !important;
+    }
+
+    .commitments-widget {
+        border: 1px dashed rgba(0, 180, 255, 0.25);
+        background: rgba(0, 180, 255, 0.01) !important;
+        border-radius: var(--radius-md);
+        padding: 0.85rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+
+    .commitments-title {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #0076f7;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border-light);
+        padding-bottom: 0.35rem;
+        margin: 0;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .commitment-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.76rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    .commitment-item i {
+        color: #10b981;
+        font-size: 0.85rem;
+    }
+
+    .support-widget {
+        background: rgba(239, 68, 68, 0.02) !important;
+        border: 1px solid rgba(239, 68, 68, 0.1) !important;
+        border-radius: var(--radius-md);
+        padding: 0.85rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .support-title {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #ef4444;
+        text-transform: uppercase;
+        margin: 0;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .support-number {
+        font-size: 0.74rem;
+        color: var(--text-secondary);
+        line-height: 1.35;
+        margin: 0;
+    }
+
+    .support-number strong {
+        color: #ef4444;
+        font-weight: 700;
+    }
+
+    /* Breadcrumbs Trail */
+    .breadcrumb-trail {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        margin-bottom: 1.25rem;
+        padding: 0.5rem 1rem;
+        background: var(--bg-dark-card);
+        border: 1px solid var(--border-light);
+        border-radius: 8px;
+    }
+
+    .breadcrumb-link {
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumb-link:hover {
+        color: #00b4ff;
+    }
+
+    .breadcrumb-separator {
+        color: var(--text-muted);
+        font-size: 0.65rem;
+    }
+
+    .breadcrumb-current {
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    /* ═══ BOTTOM DETAILS LAYOUT ═══ */
+    .bottom-details-layout {
+        display: grid;
+        grid-template-columns: 2.2fr 0.8fr;
+        gap: 2rem;
+        align-items: start;
+        margin-bottom: 3rem;
+    }
+
+    @@media (max-width: 992px) {
+        .bottom-details-layout { grid-template-columns: 1fr; gap: 2rem; }
+        .sticky-product-widget { display: none; }
+    }
+
+    .specs-section, .manufacturer-section {
+        background: var(--bg-dark-card);
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-card);
+    }
+
+    .specs-title-bar {
+        background: rgba(0, 118, 247, 0.08);
+        border-bottom: 1px solid var(--border-light);
+        color: var(--text-primary);
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        padding: 0.8rem 1.25rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-left: 4px solid #0076f7;
+    }
+
+    body.theme-light .specs-title-bar {
+        background: rgba(0, 118, 247, 0.04);
+    }
+
+    .specs-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.88rem;
+    }
+
+    .specs-table tr {
+        border-bottom: 1px solid var(--border-light);
+        transition: background 0.2s ease;
+    }
+
+    .specs-table tr:hover {
+        background: rgba(0, 180, 255, 0.01);
+    }
+
+    .specs-table tr:last-child {
+        border-bottom: none;
+    }
+
+    .specs-table td {
+        padding: 0.8rem 1.25rem;
+        vertical-align: middle;
+        color: var(--text-secondary);
+    }
+
+    .specs-table td.spec-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        width: 25%;
+        border-right: 1px solid var(--border-light);
+        background: rgba(0, 180, 255, 0.01);
+    }
+
+    .manufacturer-content {
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    @@media (max-width: 576px) {
+        .manufacturer-content { flex-direction: column; text-align: center; gap: 0.85rem; }
+    }
+
+    .brand-desc-text {
+        font-size: 0.85rem;
+        line-height: 1.6;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    /* Sticky Product Info Widget */
+    .sticky-product-widget {
+        position: sticky;
+        top: 90px;
+        background: var(--bg-dark-card);
+        border: 1px solid rgba(0, 180, 255, 0.15);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem;
+        box-shadow: var(--shadow-card), 0 0 15px rgba(0, 180, 255, 0.03);
+        z-index: 10;
+        text-align: center;
+    }
+
+    .widget-title {
+        font-size: 0.84rem;
+        font-weight: 800;
+        color: #0076f7;
+        margin-bottom: 0.85rem;
+        text-transform: uppercase;
+        border-bottom: 2px dashed rgba(0, 180, 255, 0.2);
+        padding-bottom: 0.5rem;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .widget-product-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .widget-product-img {
+        width: 120px;
+        height: 120px;
+        object-fit: contain;
+        margin-bottom: 0.75rem;
+        filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.15));
+        transition: transform 0.3s ease;
+    }
+
+    .widget-product-box:hover .widget-product-img {
+        transform: scale(1.04);
+    }
+
+    .widget-product-name {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        line-height: 1.35;
+        margin-bottom: 0.5rem;
+        height: 2.4rem;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    .widget-product-price {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #ef4444;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .widget-product-old-price {
+        font-size: 0.76rem;
+        color: var(--text-muted);
+        text-decoration: line-through;
+        margin-bottom: 0.85rem;
+    }
+
+    .widget-buy-btn {
+        width: 100%;
+        background: #ef4444;
+        color: #ffffff;
+        border: none;
+        padding: 0.7rem 1rem;
+        font-size: 0.88rem;
+        font-weight: 700;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: var(--transition-fast);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .widget-buy-btn:hover {
+        background: #dc2626;
+        box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+        transform: translateY(-2px);
+    }
+
+    /* ═══ RELATED PRODUCTS ═══ */
+    .related-section {
+        margin-top: 3.5rem;
+        background: var(--bg-dark-card);
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-xl);
+        padding: 2.5rem;
+        box-shadow: var(--shadow-card);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .related-title-sec {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        border-bottom: 1px solid var(--border-light);
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .related-title {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        font-family: 'Outfit', sans-serif;
+        margin: 0;
+    }
+
+    .product-grid-related {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 1.5rem;
+    }
+
+    @@media (max-width: 1200px) {
+        .product-grid-related { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    @@media (max-width: 992px) {
+        .product-grid-related { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @@media (max-width: 768px) {
+        .product-grid-related { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @@media (max-width: 576px) {
+        .product-grid-related { grid-template-columns: 1fr; }
+    }
+
+    /* ═══ RELATED PRODUCT CARD ═══ */
+    .related-section .product-card {
+        background: rgba(13, 33, 55, 0.2);
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        transition: var(--transition-normal);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative;
+        text-decoration: none !important;
+        color: inherit;
+    }
+
+    body.theme-light .related-section .product-card {
+        background: rgba(232, 244, 253, 0.2);
+    }
+
+    .related-section .product-card:hover {
+        background: rgba(0, 180, 255, 0.015);
+        transform: translateY(-6px);
+        border-color: rgba(0, 180, 255, 0.2);
+        box-shadow: 0 12px 30px -10px rgba(0, 118, 247, 0.15);
+    }
+
+    .related-section .product-image-container {
+        position: relative;
+        height: 180px;
+        background: linear-gradient(145deg, rgba(13, 33, 55, 0.3) 0%, rgba(7, 21, 37, 0.5) 100%);
+        border-bottom: 1px solid var(--border-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        padding: 1rem;
+    }
+
+    body.theme-light .related-section .product-image-container {
+        background: linear-gradient(145deg, rgba(232, 244, 253, 0.4) 0%, rgba(240, 247, 255, 0.2) 100%);
+    }
+
+    .related-section .product-image-small {
+        max-width: 80%;
+        max-height: 80%;
+        object-fit: contain;
+        transition: var(--transition-normal);
+        filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.15));
+    }
+
+    .related-section .product-card:hover .product-image-small {
+        transform: scale(1.05);
+        filter: drop-shadow(0 10px 20px rgba(0, 118, 247, 0.2));
+    }
+
+    .related-section .product-details {
+        padding: 1.15rem;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        justify-content: space-between;
+    }
+
+    .related-section .product-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 0.5rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .related-section .product-name-rel {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        font-family: 'Outfit', sans-serif;
+        margin: 0;
+        line-height: 1.35;
+        height: 2.5rem;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    .related-section .product-desc {
+        color: var(--text-secondary);
+        font-size: 0.78rem;
+        line-height: 1.45;
+        margin-bottom: 1rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 2.25rem;
+    }
+
+    .related-section .product-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid var(--border-light);
+        padding-top: 0.85rem;
+        margin-top: auto;
+    }
+
+    .related-section .product-btn-cart {
+        background: linear-gradient(135deg, #0076f7, #00b4ff);
+        border: none;
+        color: #ffffff;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition-fast);
+        cursor: pointer;
+        font-size: 0.8rem;
+        box-shadow: 0 3px 10px rgba(0, 118, 247, 0.2);
+    }
+
+    .related-section .product-card:hover .product-btn-cart {
+        transform: scale(1.08) translateY(-1px);
+        box-shadow: 0 5px 14px rgba(0, 118, 247, 0.3);
+    }
+</style>
+
+<!-- ═══ BREADCRUMB TRAIL ═══ -->
+<div class="breadcrumb-trail">
+    <a href="@Url.Action("Index", "Products")" class="breadcrumb-link">Trang chủ</a>
+    <span class="breadcrumb-separator">»</span>
+    <a href="@Url.Action("Index", "Products")" class="breadcrumb-link">Sản phẩm</a>
+    <span class="breadcrumb-separator">»</span>
+    @if (Model.Product.Category != null)
+    {
+        <a href="@Url.Action("Index", "Products", new { category = Model.Product.Category.Name })" class="breadcrumb-link">@Model.Product.Category.Name</a>
+        <span class="breadcrumb-separator">»</span>
+    }
+    <span class="breadcrumb-current">@Model.Product.Name</span>
+</div>
+
+<!-- ═══ MAIN DETAILS ═══ -->
+<div class="details-container">
+    <div class="details-glow"></div>
+    <div class="details-glow-2"></div>
+    
+    <div class="details-grid">
+        <!-- Left Column: Image Gallery -->
+        <div class="details-left-wrapper">
+            <div class="details-image-box">
+                <!-- Diagonal Discount & Super Sale badge -->
+                <div class="discount-badge-diagonal">-@discountPercent%</div>
+                <div class="ribbon-sale-corner">MUA NGAY</div>
+                
+                <img id="mainProductImage" src="~/product/imges/@Model.Product.ImagePath" alt="@Model.Product.Name" class="details-image" />
+            </div>
+            
+            @if (Model.Product.ProductImages != null && Model.Product.ProductImages.Count > 0)
+            {
+                <div class="details-thumbnails-row">
+                    <div class="details-thumbnail-item active" onclick="changeMainImage(this, '@Url.Content("~/product/imges/" + Model.Product.ImagePath)')">
+                        <img src="~/product/imges/@Model.Product.ImagePath" class="details-thumbnail-img" alt="Main" />
+                    </div>
+                    
+                    @foreach (var img in Model.Product.ProductImages.OrderBy(i => i.DisplayOrder))
+                    {
+                        @if (img.ImagePath != Model.Product.ImagePath)
+                        {
+                            <div class="details-thumbnail-item" onclick="changeMainImage(this, '@Url.Content("~/product/imges/" + img.ImagePath)')">
+                                <img src="~/product/imges/@img.ImagePath" class="details-thumbnail-img" alt="Detail" />
+                            </div>
+                        }
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Center Column: Product Info -->
+        <div class="details-info">
+            <div class="badge-row">
+                <a href="@Url.Action("Index", "Products", new { category = Model.Product.Category?.Name })" class="details-cat-badge">
+                    <i class="fa-solid fa-tag"></i> @(Model.Product.Category?.Name ?? "Sản phẩm")
+                </a>
+                
+                @if (Model.Product.StockStatus == "InStock")
+                {
+                    <span class="details-stock-badge stock-instock"><span class="tech-dot dot-green"></span>Còn hàng</span>
+                }
+                else if (Model.Product.StockStatus == "LowStock")
+                {
+                    <span class="details-stock-badge stock-lowstock"><span class="tech-dot dot-orange"></span>Sắp hết - Đặt ngay</span>
+                }
+                else
+                {
+                    <span class="details-stock-badge stock-outofstock"><span class="tech-dot dot-red"></span>Tạm hết hàng</span>
+                }
+            </div>
+
+            <h2 class="details-title">@Model.Product.Name</h2>
+            
+            <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 1.25rem; border-bottom: 1px solid var(--border-light); padding-bottom: 0.5rem; margin-top: -0.25rem;">
+                <span>Mã SP: <strong style="color: var(--text-primary);">VTTGT-@Model.Product.Id</strong></span>
+                <span>Hãng SX: <strong style="color: #0076f7;">@manufacturerName</strong></span>
+            </div>
+
+            <!-- Price block -->
+            <div style="background: rgba(0, 118, 247, 0.02); border: 1px solid var(--border-light); border-radius: 8px; padding: 0.85rem 1.15rem; display: flex; flex-direction: column; gap: 0.35rem;">
+                <div style="display: flex; align-items: baseline; gap: 0.75rem; flex-wrap: wrap;">
+                    <span style="font-size: 1.85rem; font-weight: 800; color: #ef4444; font-family: 'Outfit', sans-serif;">
+                        @((Model.Product.Price * 25000).ToString("#,##0")) đ
+                    </span>
+                    <span style="font-size: 0.78rem; color: var(--text-muted); font-style: italic;">
+                        (Giá đã bao gồm VAT)
+                    </span>
+                </div>
+                <div style="display: flex; gap: 1rem; font-size: 0.8rem;">
+                    <span style="color: var(--text-muted);">Giá cũ: <span style="text-decoration: line-through;">@((originalPrice * 25000).ToString("#,##0")) đ</span></span>
+                    <span style="color: #ef4444; font-weight: 600;">Tiết kiệm: @discountPercent%</span>
+                </div>
+            </div>
+
+            <!-- Specs Checklist -->
+            <ul style="list-style: none; padding: 0; margin: 0.25rem 0; display: flex; flex-direction: column; gap: 0.45rem;">
+                @foreach (var feature in specsChecklist)
+                {
+                    <li style="font-size: 0.82rem; color: var(--text-secondary); display: flex; align-items: flex-start; gap: 0.45rem; line-height: 1.4;">
+                        <i class="fa-solid fa-circle-check" style="color: #10b981; font-size: 0.85rem; margin-top: 0.15rem; flex-shrink: 0;"></i>
+                        <span>@feature</span>
+                    </li>
+                }
+            </ul>
+
+            <!-- Quantity Selector & Action Buttons -->
+            <div style="display: flex; flex-direction: column; gap: 0.85rem; border-top: 1px solid var(--border-light); padding-top: 1rem; margin-top: 0.25rem;">
+                <div class="qty-selector-box">
+                    <span>Số lượng:</span>
+                    <div class="qty-input-group">
+                        <button type="button" class="qty-btn" onclick="adjustQty(-1)">-</button>
+                        <input type="text" id="productQty" value="1" class="qty-input" readonly />
+                        <button type="button" class="qty-btn" onclick="adjustQty(1)">+</button>
+                    </div>
+                    <span style="font-size: 0.76rem; color: var(--text-muted);">Tình trạng: Còn hàng sẵn kho</span>
+                </div>
+
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                    @if (Model.Product.StockStatus == "OutOfStock")
+                    {
+                        <button type="button" class="btn-buy-now-custom bg-secondary" style="padding: 0.6rem 1rem; font-size: 0.85rem; flex: 1.2; cursor: not-allowed; box-shadow: none; opacity: 0.5;" disabled>
+                            <i class="fa-solid fa-ban"></i> Hết Hàng
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn-buy-now-custom" onclick="addToCart()" style="padding: 0.6rem 1rem; font-size: 0.85rem; flex: 1.2;">
+                            <i class="fa-solid fa-cart-shopping"></i> Chọn Mua
+                        </button>
+                    }
+                    <a href="tel:0903123456" class="btn-consult-custom" style="padding: 0.6rem 1rem; font-size: 0.85rem; flex: 0.8; text-align: center;">
+                        <i class="fa-solid fa-phone"></i> Tư Vấn
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Sidebar Widgets -->
+        <div class="details-sidebar">
+            <!-- Orange Gift Card Moved Here -->
+            <div class="gift-info-card" style="margin-top: 0; margin-bottom: 1rem;">
+                <div class="gift-badge-new">Mới</div>
+                <div class="gift-title-bar">
+                    <i class="fa-solid fa-gift"></i> Thông tin ưu đãi đặc biệt
+                </div>
+                <ul class="gift-list">
+                    <li class="gift-item">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Miễn phí hướng dẫn khảo sát và cấu hình thiết bị từ xa qua Ultraview/Teamview.</span>
+                    </li>
+                    <li class="gift-item">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Cam kết 1-đổi-1 miễn phí trong vòng 7 ngày đầu sử dụng nếu phát sinh lỗi kỹ thuật.</span>
+                    </li>
+                    <li class="gift-item">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Tặng gói hỗ trợ kỹ thuật trọn đời từ đội ngũ chuyên gia của Viễn Thông Gia Trí.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-widget">
+                <div class="widget-icon-box">
+                    <i class="fa-solid fa-truck-fast"></i>
+                </div>
+                <div class="widget-text-box">
+                    <span class="widget-text-title">Giao hàng miễn phí</span>
+                    <span class="widget-text-desc">Toàn quốc cho đơn hàng lớn. Xem chi tiết chính sách <a href="#" class="widget-link">TẠI ĐÂY</a></span>
+                </div>
+            </div>
+
+            <div class="sidebar-widget">
+                <div class="widget-icon-box">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                </div>
+                <div class="widget-text-box">
+                    <span class="widget-text-title">Phí dịch vụ lắp đặt</span>
+                    <span class="widget-text-desc">Chuyên nghiệp - Tận tâm - Thẩm mỹ. Xem bảng chi tiết <a href="#" class="widget-link">TẠI ĐÂY</a></span>
+                </div>
+            </div>
+
+            <!-- Commitments widget -->
+            <div class="commitments-widget">
+                <h4 class="commitments-title">Gia Trí Cam Kết</h4>
+                <div class="commitment-item">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>SẢN PHẨM CHÍNH HÃNG 100%</span>
+                </div>
+                <div class="commitment-item">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>GIÁ CẢ LUÔN TỐT NHẤT</span>
+                </div>
+                <div class="commitment-item">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>BÁN HÀNG CHUYÊN NGHIỆP</span>
+                </div>
+                <div class="commitment-item">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>HẬU MÃI TẬN TÂM CHU ĐÁO</span>
+                </div>
+            </div>
+
+            <!-- Support widget -->
+            <div class="support-widget">
+                <h4 class="support-title"><i class="fa-solid fa-headset"></i> Tổng đài hỗ trợ</h4>
+                <p class="support-number">Mua hàng: <strong>0903.123.456</strong> (08:00 - 17:30)</p>
+                <p class="support-number">Kỹ thuật: <strong>0903.987.654</strong> (24/7)</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ TECHNICAL SPECS & MANUFACTURER SECTION (VUHOANG STYLE) ═══ -->
+<div class="bottom-details-layout">
+    <!-- Left Area (72%): Specifications Table & Brand Info -->
+    <div class="bottom-left-area">
+        <!-- Specs Section -->
+        <div class="specs-section">
+            <h3 class="specs-title-bar">
+                <i class="fa-solid fa-sliders"></i> Thông số kỹ thuật
+            </h3>
+            <table class="specs-table">
+                <tbody>
+                    @if (Model.Product.ProductSpecifications != null && Model.Product.ProductSpecifications.Any())
+                    {
+                        @foreach (var spec in Model.Product.ProductSpecifications.OrderBy(s => s.DisplayOrder))
+                        {
+                            <tr>
+                                <td class="spec-name">@spec.Name</td>
+                                <td>@spec.Value</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        @foreach (var param in specParams)
+                        {
+                            <tr>
+                                <td class="spec-name">@param.Key</td>
+                                <td>@param.Value</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Manufacturer Profile Section -->
+        <div class="manufacturer-section">
+            <h3 class="specs-title-bar">
+                <i class="fa-solid fa-circle-info"></i> Thông tin hãng sản xuất
+            </h3>
+            <div class="manufacturer-content">
+                <div class="brand-logo-container">
+                    <span style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.15rem; color: #0076f7; letter-spacing: -0.02em;">
+                        @manufacturerName
+                    </span>
+                </div>
+                <div style="flex: 1;">
+                    <p class="brand-desc-text">
+                        <strong>@manufacturerName</strong> là hãng sản xuất thiết bị hàng đầu với uy tín lâu năm trên thị trường viễn thông và thiết bị mạng thông minh. 
+                        @brandDesc
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Area (28%): Sticky Widget showcasing currently viewed product -->
+    <div class="bottom-right-area">
+        <div class="sticky-product-widget">
+            <h4 class="widget-title">Sản phẩm bạn đang xem</h4>
+            <div class="widget-product-box">
+                <img src="~/product/imges/@Model.Product.ImagePath" class="widget-product-img" alt="@Model.Product.Name" />
+                <h5 class="widget-product-name">@Model.Product.Name</h5>
+                <div class="widget-product-price">@((Model.Product.Price * 25000).ToString("#,##0")) đ</div>
+                <div class="widget-product-old-price">@((originalPrice * 25000).ToString("#,##0")) đ</div>
+                @if (Model.Product.StockStatus == "OutOfStock")
+                {
+                    <button type="button" class="widget-buy-btn bg-secondary" style="cursor: not-allowed; opacity: 0.5;" disabled>Hết Hàng</button>
+                }
+                else
+                {
+                    <button type="button" class="widget-buy-btn" onclick="addToCart()">Mua Ngay</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ RELATED PRODUCTS ═══ -->
+<div class="related-section">
+    <div class="related-title-sec">
+        <h3 class="related-title">Sản Phẩm Cùng Danh Mục</h3>
+        <span style="color: var(--text-muted); font-size: 0.85rem;">@(Model.Product.Category?.Name ?? "General")</span>
+    </div>
+
+    @if (Model.RelatedProducts.Count == 0)
+    {
+        <p style="color: var(--text-muted); font-style: italic;">Không có sản phẩm nào khác cùng danh mục.</p>
+    }
+    else
+    {
+        <div class="product-grid-related">
+            @foreach (var p in Model.RelatedProducts)
+            {
+                <a href="@Url.Action("Details", "Products", new { id = p.Id })" class="product-card">
+                    <div class="product-card-glow"></div>
+                    
+                    <div class="badge-container-top">
+                        <span class="product-badge-cat">@(p.Category?.Name ?? "Sản phẩm")</span>
+                        
+                        @if (p.StockStatus == "InStock")
+                        {
+                            <span class="product-badge-stock stock-instock"><span class="tech-dot dot-green"></span>Còn hàng</span>
+                        }
+                        else if (p.StockStatus == "LowStock")
+                        {
+                            <span class="product-badge-stock stock-lowstock"><span class="tech-dot dot-orange"></span>Sắp hết</span>
+                        }
+                        else
+                        {
+                            <span class="product-badge-stock stock-outofstock"><span class="tech-dot dot-red"></span>Hết hàng</span>
+                        }
+                    </div>
+
+                    <div class="product-image-container">
+                        <img src="~/product/imges/@p.ImagePath" alt="@p.Name" class="product-image-small" />
+                    </div>
+
+                    <div class="product-details">
+                        <div>
+                            <div class="product-title-row">
+                                <h4 class="product-name-rel">@p.Name</h4>
+                                <div class="product-rating">
+                                    <i class="fa-solid fa-star"></i>
+                                    <span>@p.Rating.ToString("0.0")</span>
+                                </div>
+                            </div>
+                            <p class="product-desc">@p.Description</p>
+                        </div>
+
+                        <div class="product-footer">
+                            <div class="product-price-box">
+                                <span class="price-label">Giá bán</span>
+                                <span class="product-price">@((p.Price * 25000).ToString("#,##0")) đ</span>
+                            </div>
+                            <div class="product-btn-cart">
+                                <i class="fa-solid fa-cart-shopping"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function changeMainImage(element, imageUrl) {
+            const mainImage = document.getElementById('mainProductImage');
+            if (!mainImage) return;
+
+            const thumbnails = document.querySelectorAll('.details-thumbnail-item');
+            thumbnails.forEach(t => t.classList.remove('active'));
+            element.classList.add('active');
+
+            mainImage.classList.add('fade-out');
+
+            setTimeout(() => {
+                mainImage.src = imageUrl;
+                
+                mainImage.onload = () => {
+                    mainImage.classList.remove('fade-out');
+                };
+                
+                if (mainImage.complete) {
+                    mainImage.classList.remove('fade-out');
+                }
+            }, 250);
+        }
+
+        function adjustQty(amount) {
+            const qtyInput = document.getElementById('productQty');
+            if (!qtyInput) return;
+            
+            let val = parseInt(qtyInput.value) || 1;
+            val += amount;
+            if (val < 1) val = 1;
+            qtyInput.value = val;
+        }
+
+        function addToCart() {
+            const qtyInput = document.getElementById('productQty');
+            const qty = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
+            addToCartAjax(@Model.Product.Id, qty);
+        }
+    </script>
+}

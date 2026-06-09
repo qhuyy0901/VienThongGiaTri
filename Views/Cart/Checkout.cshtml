@@ -1,0 +1,493 @@
+@model AspNetMvcApp.Models.CheckoutViewModel
+@{
+    ViewData["Title"] = "Thanh Toán Đơn Hàng - Viễn Thông Gia Trí";
+}
+
+<style>
+    /* ═══ PREMIUM CHECKOUT STYLES ═══ */
+    .checkout-container {
+        background: var(--bg-dark-card);
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-xl);
+        padding: 2.5rem;
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        box-shadow: var(--shadow-card);
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .checkout-glow {
+        position: absolute;
+        width: 350px;
+        height: 350px;
+        top: -150px;
+        right: -150px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(0, 180, 255, 0.06) 0%, transparent 65%);
+        pointer-events: none;
+    }
+
+    .checkout-title {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 1.8rem;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        border-bottom: 1px solid var(--border-light);
+        padding-bottom: 1rem;
+    }
+
+    .checkout-title i {
+        background: var(--grad-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .checkout-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 2.5rem;
+        align-items: start;
+    }
+
+    @@media (max-width: 992px) {
+        .checkout-grid {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+    }
+
+    /* ── Billing & Shipping Form ── */
+    .billing-section-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .billing-section-title i {
+        color: #00b4ff;
+    }
+
+    .checkout-form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .checkout-label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 0.4rem;
+    }
+
+    .checkout-input {
+        width: 100%;
+        background: rgba(13, 33, 55, 0.25);
+        border: 1px solid var(--border-light);
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        outline: none;
+        transition: var(--transition-normal);
+    }
+
+    body.theme-light .checkout-input {
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .checkout-input:focus {
+        border-color: rgba(0, 180, 255, 0.35);
+        background: rgba(13, 33, 55, 0.35);
+        box-shadow: 0 0 15px rgba(0, 180, 255, 0.08);
+    }
+
+    body.theme-light .checkout-input:focus {
+        background: #ffffff;
+        border-color: rgba(0, 118, 247, 0.35);
+        box-shadow: 0 0 15px rgba(0, 118, 247, 0.08);
+    }
+
+    .validation-error {
+        color: #ef4444;
+        font-size: 0.78rem;
+        margin-top: 0.3rem;
+        display: block;
+    }
+
+    /* Payment Methods */
+    .payment-methods-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    .payment-option-card {
+        background: rgba(13, 33, 55, 0.25);
+        border: 1px solid var(--border-light);
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        cursor: pointer;
+        transition: var(--transition-normal);
+    }
+
+    body.theme-light .payment-option-card {
+        background: rgba(255, 255, 255, 0.85);
+    }
+
+    .payment-option-card:hover {
+        border-color: rgba(0, 180, 255, 0.25);
+        background: rgba(0, 180, 255, 0.01);
+    }
+
+    .payment-radio {
+        width: 18px;
+        height: 18px;
+        margin-top: 0.15rem;
+        cursor: pointer;
+        accent-color: #00b4ff;
+    }
+
+    .payment-option-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .payment-option-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .payment-option-desc {
+        font-size: 0.76rem;
+        color: var(--text-secondary);
+        line-height: 1.4;
+    }
+
+    /* ── Order Summary Card ── */
+    .checkout-summary-card {
+        background: rgba(13, 33, 55, 0.3);
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-lg);
+        padding: 1.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    body.theme-light .checkout-summary-card {
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    .summary-section-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        border-bottom: 1px solid var(--border-light);
+        padding-bottom: 0.75rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .summary-section-title i {
+        color: #00b4ff;
+    }
+
+    .checkout-items-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+        max-height: 280px;
+        overflow-y: auto;
+        padding-right: 0.25rem;
+    }
+
+    .checkout-item-mini {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        justify-content: space-between;
+        background: rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-light);
+        padding: 0.65rem 0.85rem;
+        border-radius: 8px;
+    }
+
+    .checkout-item-mini-img-box {
+        width: 44px;
+        height: 44px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-light);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.2rem;
+        flex-shrink: 0;
+    }
+
+    .checkout-item-mini-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .checkout-item-mini-info {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .checkout-item-mini-name {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .checkout-item-mini-qty {
+        font-size: 0.74rem;
+        color: var(--text-secondary);
+    }
+
+    .checkout-item-mini-total {
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        white-space: nowrap;
+    }
+
+    .summary-totals-box {
+        border-top: 1px solid var(--border-light);
+        border-bottom: 1px solid var(--border-light);
+        padding: 0.85rem 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+
+    .totals-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .totals-row.grand-total {
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-top: 0.25rem;
+    }
+
+    .grand-total-val {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #00b4ff;
+    }
+
+    .btn-place-order {
+        background: linear-gradient(135deg, #10b981, #059669);
+        border: none;
+        color: #ffffff;
+        padding: 0.85rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 700;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: var(--transition-normal);
+        box-shadow: 0 4px 18px rgba(16, 185, 129, 0.3);
+        font-family: 'Outfit', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        width: 100%;
+    }
+
+    .btn-place-order:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45);
+        filter: brightness(1.08);
+    }
+
+    .checkout-commitments {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        font-size: 0.74rem;
+        color: var(--text-muted);
+        background: rgba(0, 180, 255, 0.01);
+        border: 1px dashed var(--border-light);
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+    }
+
+    .commitment-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .commitment-item i {
+        color: #10b981;
+    }
+</style>
+
+<div class="checkout-container">
+    <div class="checkout-glow"></div>
+
+    <h1 class="checkout-title">
+        <i class="fa-solid fa-credit-card"></i> Thanh Toán Đơn Hàng
+    </h1>
+
+    <div class="checkout-grid">
+        <!-- Left Column: Shipping Form -->
+        <div>
+            <h2 class="billing-section-title">
+                <i class="fa-solid fa-truck-ramp-box"></i> Thông tin giao hàng
+            </h2>
+
+            <form asp-action="Checkout" method="post" id="checkoutForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="SelectedProductIds" />
+
+                <div class="checkout-form-group">
+                    <label asp-for="FullName" class="checkout-label">Họ và Tên người nhận</label>
+                    <input asp-for="FullName" class="checkout-input" placeholder="Nhập đầy đủ họ và tên" required autocomplete="name" />
+                    <span asp-validation-for="FullName" class="validation-error"></span>
+                </div>
+
+                <div class="checkout-form-group">
+                    <label asp-for="Phone" class="checkout-label">Số điện thoại liên lạc</label>
+                    <input asp-for="Phone" class="checkout-input" type="tel" placeholder="VD: 0317656136" required autocomplete="tel" />
+                    <span asp-validation-for="Phone" class="validation-error"></span>
+                </div>
+
+                <div class="checkout-form-group">
+                    <label asp-for="Address" class="checkout-label">Địa chỉ giao hàng chi tiết</label>
+                    <input asp-for="Address" class="checkout-input" placeholder="Số nhà, Tên đường, Phường/Xã, Quận/Huyện, TP.HCM" required autocomplete="street-address" />
+                    <span asp-validation-for="Address" class="validation-error"></span>
+                </div>
+
+                <div class="checkout-form-group">
+                    <label asp-for="Notes" class="checkout-label">Ghi chú giao hàng (Tùy chọn)</label>
+                    <textarea asp-for="Notes" class="checkout-input" rows="3" placeholder="Ví dụ: Giao hàng vào giờ hành chính, gọi trước khi giao 15 phút..."></textarea>
+                </div>
+
+                <h2 class="billing-section-title mt-4">
+                    <i class="fa-solid fa-wallet"></i> Phương thức thanh toán
+                </h2>
+
+                <div class="payment-methods-wrapper">
+                    <!-- COD option -->
+                    <label class="payment-option-card" for="paymentCOD">
+                        <input type="radio" asp-for="PaymentMethod" value="COD" id="paymentCOD" class="payment-radio" checked />
+                        <div class="payment-option-details">
+                            <span class="payment-option-title">Thanh toán khi nhận hàng (COD)</span>
+                            <span class="payment-option-desc">Bạn sẽ thanh toán tiền mặt trực tiếp cho nhân viên giao hàng khi nhận được thiết bị.</span>
+                        </div>
+                    </label>
+
+                    <!-- Bank Transfer option -->
+                    <label class="payment-option-card" for="paymentTransfer">
+                        <input type="radio" asp-for="PaymentMethod" value="BankTransfer" id="paymentTransfer" class="payment-radio" />
+                        <div class="payment-option-details">
+                            <span class="payment-option-title">Chuyển khoản ngân hàng (Fast 24/7)</span>
+                            <span class="payment-option-desc">Chuyển khoản nhanh qua tài khoản ngân hàng QR Code. Đơn hàng sẽ được xử lý ngay sau khi hệ thống nhận được thanh toán.</span>
+                        </div>
+                    </label>
+                </div>
+            </form>
+        </div>
+
+        <!-- Right Column: Order Summary -->
+        <div class="checkout-summary-card">
+            <h3 class="summary-section-title">
+                <i class="fa-solid fa-basket-shopping"></i> Tóm tắt đơn đặt hàng
+            </h3>
+
+            <div class="checkout-items-list">
+                @foreach (var item in Model.SelectedItems)
+                {
+                    <div class="checkout-item-mini">
+                        <div class="checkout-item-mini-img-box">
+                            <img src="~/product/imges/@item.ImagePath" alt="@item.Name" class="checkout-item-mini-img" />
+                        </div>
+                        <div class="checkout-item-mini-info">
+                            <h4 class="checkout-item-mini-name" title="@item.Name">@item.Name</h4>
+                            <span class="checkout-item-mini-qty">Số lượng: @item.Quantity</span>
+                        </div>
+                        <div class="checkout-item-mini-total">
+                            @((item.TotalPrice * 25000).ToString("#,##0")) đ
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="summary-totals-box">
+                <div class="totals-row">
+                    <span>Tạm tính:</span>
+                    <span>@((Model.Subtotal * 25000).ToString("#,##0")) đ</span>
+                </div>
+                <div class="totals-row">
+                    <span>Phí vận chuyển:</span>
+                    <span class="text-success fw-600">Miễn phí giao hàng</span>
+                </div>
+                <div class="totals-row grand-total">
+                    <span>Tổng thanh toán:</span>
+                    <span class="grand-total-val">@((Model.Subtotal * 25000).ToString("#,##0")) đ</span>
+                </div>
+            </div>
+
+            <button type="submit" form="checkoutForm" class="btn-place-order">
+                <i class="fa-solid fa-circle-check"></i> Xác Nhận Đặt Hàng
+            </button>
+
+            <a href="@Url.Action("Index")" class="btn-continue-shopping">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại Giỏ hàng
+            </a>
+
+            <div class="checkout-commitments">
+                <div class="commitment-item">
+                    <i class="fa-solid fa-shield-check"></i>
+                    <span>Sản phẩm chính hãng 100% bảo hành tới 24 tháng</span>
+                </div>
+                <div class="commitment-item">
+                    <i class="fa-solid fa-clock"></i>
+                    <span>Giao hàng siêu tốc trong ngày khu vực TP.HCM</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

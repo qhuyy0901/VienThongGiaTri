@@ -1,0 +1,470 @@
+@model List<AspNetMvcApp.Models.UserViewModel>
+@{
+    ViewData["Title"] = "Quản Lý Tài Khoản";
+}
+
+<style>
+    .pm-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.75rem;
+    }
+
+    .pm-header h1 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .pm-header p {
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+        margin: 0.2rem 0 0;
+    }
+
+    .pm-btn-add {
+        background: var(--grad-primary);
+        border: none;
+        color: #fff;
+        padding: 0.7rem 1.25rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        font-family: 'Outfit', sans-serif;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: var(--transition-fast);
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .pm-btn-add:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        color: #fff;
+    }
+
+    .pm-table-card {
+        background: var(--bg-dark-card);
+        border: 1px solid var(--border-light);
+        border-radius: 16px;
+        overflow: hidden;
+        backdrop-filter: var(--glass-blur);
+    }
+
+    .pm-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .pm-table th {
+        padding: 1rem 1.25rem;
+        color: var(--text-muted);
+        font-size: 0.78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid var(--border-light);
+        text-align: left;
+    }
+
+    .pm-table td {
+        padding: 0.9rem 1.25rem;
+        border-bottom: 1px solid var(--border-light);
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        vertical-align: middle;
+    }
+
+    .pm-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .pm-table tr:hover td {
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    .pm-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .pm-btn-edit {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        color: var(--accent-blue);
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition-fast);
+        text-decoration: none;
+        font-size: 0.85rem;
+    }
+
+    .pm-btn-edit:hover {
+        background: rgba(59, 130, 246, 0.2);
+        color: var(--accent-blue);
+    }
+
+    .pm-btn-lock {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+        color: #f59e0b;
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition-fast);
+        font-size: 0.85rem;
+    }
+
+    .pm-btn-lock:hover {
+        background: rgba(245, 158, 11, 0.2);
+    }
+
+    .pm-btn-unlock {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        color: #10b981;
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition-fast);
+        font-size: 0.85rem;
+    }
+
+    .pm-btn-unlock:hover {
+        background: rgba(16, 185, 129, 0.2);
+    }
+
+    .pm-btn-delete {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition-fast);
+        font-size: 0.85rem;
+    }
+
+    .pm-btn-delete:hover {
+        background: rgba(239, 68, 68, 0.2);
+    }
+
+    /* Badges */
+    .role-badge {
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 0.25rem 0.65rem;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .role-admin {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+    }
+
+    .role-user {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        color: #3b82f6;
+    }
+
+    .status-badge {
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 0.25rem 0.65rem;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .status-active {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        color: #10b981;
+    }
+
+    .status-locked {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+        color: #f59e0b;
+    }
+
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding: 0 0.5rem;
+    }
+
+    .pagination-info {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .pagination-list {
+        display: flex;
+        gap: 0.35rem;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .page-item-custom {
+        display: inline-flex;
+    }
+
+    .page-link-custom {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        height: 36px;
+        padding: 0 6px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-light);
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .page-link-custom:hover:not(.disabled) {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text-primary);
+        border-color: rgba(255, 255, 255, 0.15);
+        transform: translateY(-1px);
+    }
+
+    .page-item-custom.active .page-link-custom {
+        background: var(--grad-primary);
+        border-color: transparent;
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25);
+    }
+
+    .page-link-custom.disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .alert-danger-custom {
+        background: rgba(239, 68, 68, 0.12);
+        border: 1px solid rgba(239, 68, 68, 0.25);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        color: #ef4444;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.9rem;
+    }
+</style>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert-danger-custom">
+        <i class="fa-solid fa-circle-exclamation" style="font-size: 1.1rem;"></i>
+        <div>@TempData["ErrorMessage"]</div>
+    </div>
+}
+
+<div class="pm-header">
+    <div>
+        <h1>Quản Lý Tài Khoản</h1>
+        <p>Tổng cộng @ViewBag.TotalUsers tài khoản người dùng trong hệ thống</p>
+    </div>
+    <a asp-action="Create" class="pm-btn-add">
+        <i class="fa-solid fa-user-plus"></i> Thêm Tài Khoản
+    </a>
+</div>
+
+<!-- Search Bar -->
+<form method="get" class="mb-4 d-flex gap-2">
+    <div style="position: relative; display: flex; align-items: center; flex: 1; max-width: 380px;">
+        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 1rem; color: var(--text-muted); font-size: 0.88rem; pointer-events: none;"></i>
+        <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" placeholder="Tìm kiếm theo email tài khoản..." style="padding: 0.65rem 1rem 0.65rem 2.5rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-light); border-radius: 10px; color: var(--text-primary); outline: none; width: 100%; transition: all 0.2s;" onfocus="this.style.borderColor='rgba(59, 130, 246, 0.5)';" onblur="this.style.borderColor='var(--border-light)';" />
+    </div>
+    <button type="submit" class="btn-submit py-2" style="background: var(--grad-primary); border: none; color: #fff; padding: 0 1.25rem; font-weight: 600; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.25);">
+        <i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm
+    </button>
+    @if (!string.IsNullOrEmpty(ViewBag.SearchTerm))
+    {
+        <a href="@Url.Action("Index")" class="btn-cancel py-2" style="background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-light); color: var(--text-primary); padding: 0.65rem 1.25rem; font-weight: 600; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-arrow-rotate-left"></i> Đặt lại
+        </a>
+    }
+</form>
+
+<div class="pm-table-card">
+    <table class="pm-table">
+        <thead>
+            <tr>
+                <th style="width: 25%;">Tên Tài Khoản (Email)</th>
+                <th style="width: 20%;">Vai Trò</th>
+                <th style="width: 20%;">Trạng Thái</th>
+                <th style="width: 20%;">Hành Động Khóa</th>
+                <th style="width: 15%;">Thao Tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                var isCurrentUser = user.Username == User.Identity?.Name;
+                <tr>
+                    <td style="font-weight: 600; font-family: 'Outfit', sans-serif;">
+                        @user.Email
+                        @if (isCurrentUser)
+                        {
+                            <span class="badge bg-secondary ms-1" style="font-size: 0.65rem; padding: 0.2rem 0.4rem; border-radius: 4px;">Bạn</span>
+                        }
+                    </td>
+                    <td>
+                        @foreach (var role in user.Roles)
+                        {
+                            var badgeClass = role == "Admin" ? "role-admin" : "role-user";
+                            var icon = role == "Admin" ? "fa-shield-halved" : "fa-user";
+                            <span class="role-badge @badgeClass">
+                                <i class="fa-solid @icon"></i> @role
+                            </span>
+                        }
+                        @if (!user.Roles.Any())
+                        {
+                            <span class="role-badge role-user">
+                                <i class="fa-solid fa-user"></i> Không có vai trò
+                            </span>
+                        }
+                    </td>
+                    <td>
+                        @if (user.IsLockedOut)
+                        {
+                            <span class="status-badge status-locked">
+                                <i class="fa-solid fa-lock"></i> Đang bị khóa
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="status-badge status-active">
+                                <i class="fa-solid fa-circle-check"></i> Hoạt động
+                            </span>
+                        }
+                    </td>
+                    <td>
+                        @if (!isCurrentUser)
+                        {
+                            <form asp-action="ToggleLock" asp-route-id="@user.Id" method="post" style="margin:0;">
+                                @if (user.IsLockedOut)
+                                {
+                                    <button type="submit" class="pm-btn-unlock d-inline-flex align-items-center gap-1 px-3 py-1" style="width: auto; height: auto; border-radius: 6px; font-size: 0.8rem; font-weight: 600;" title="Mở khóa tài khoản">
+                                        <i class="fa-solid fa-lock-open"></i> Mở Khóa
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="pm-btn-lock d-inline-flex align-items-center gap-1 px-3 py-1" style="width: auto; height: auto; border-radius: 6px; font-size: 0.8rem; font-weight: 600;" title="Khóa tài khoản">
+                                        <i class="fa-solid fa-user-slash"></i> Khóa Lại
+                                    </button>
+                                }
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="text-muted" style="font-size: 0.8rem; font-style: italic;">Không áp dụng</span>
+                        }
+                    </td>
+                    <td>
+                        <div class="pm-actions">
+                            <a asp-action="Edit" asp-route-id="@user.Id" class="pm-btn-edit" title="Sửa">
+                                <i class="fa-solid fa-user-pen"></i>
+                            </a>
+                            @if (!isCurrentUser)
+                            {
+                                <form asp-action="Delete" asp-route-id="@user.Id" method="post" style="margin:0;" 
+                                      onsubmit="return confirm('Bạn chắc chắn muốn XÓA HOÀN TOÀN tài khoản @user.Email khỏi hệ thống? Hành động này không thể hoàn tác!');">
+                                    <button type="submit" class="pm-btn-delete" title="Xóa">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (ViewBag.TotalPages > 1)
+{
+    int currentPage = ViewBag.CurrentPage;
+    int totalPages = ViewBag.TotalPages;
+
+    <div class="pagination-container">
+        <div class="pagination-info">
+            Hiển thị từ @(((currentPage - 1) * (int)ViewBag.PageSize) + 1) đến @Math.Min(currentPage * (int)ViewBag.PageSize, (int)ViewBag.TotalUsers) trong số @ViewBag.TotalUsers tài khoản
+        </div>
+        <ul class="pagination-list">
+            <li class="page-item-custom">
+                <a class="page-link-custom @(currentPage == 1 ? "disabled" : "")" 
+                   asp-action="Index" 
+                   asp-route-page="@(currentPage - 1)"
+                   asp-route-searchTerm="@ViewBag.SearchTerm">
+                    <i class="fa-solid fa-angle-left"></i>
+                </a>
+            </li>
+
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item-custom @(currentPage == i ? "active" : "")">
+                    <a class="page-link-custom" 
+                       asp-action="Index" 
+                       asp-route-page="@i"
+                       asp-route-searchTerm="@ViewBag.SearchTerm">@i</a>
+                </li>
+            }
+
+            <li class="page-item-custom">
+                <a class="page-link-custom @(currentPage == totalPages ? "disabled" : "")" 
+                   asp-action="Index" 
+                   asp-route-page="@(currentPage + 1)"
+                   asp-route-searchTerm="@ViewBag.SearchTerm">
+                    <i class="fa-solid fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </div>
+}

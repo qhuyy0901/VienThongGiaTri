@@ -1,0 +1,185 @@
+@{
+    int cartCount = 0;
+    var cartCookie = Context.Request.Cookies["cart"];
+    if (!string.IsNullOrEmpty(cartCookie))
+    {
+        try
+        {
+            var options = new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase };
+            var items = System.Text.Json.JsonSerializer.Deserialize<List<AspNetMvcApp.Models.CookieCartItem>>(cartCookie, options);
+            if (items != null)
+            {
+                cartCount = items.Sum(i => i.Quantity);
+            }
+        }
+        catch { }
+    }
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Viễn Thông Gia Trí - Chuyên cung cấp Camera giám sát, Switch, Router và thiết bị mạng chính hãng tại TP.HCM" />
+    <title>@ViewData["Title"] - Viễn Thông Gia Trí</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="~/imager/logo.png" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/AspNetMvcApp.styles.css" asp-append-version="true" />
+</head>
+<body class="theme-light">
+    <!-- ═══ PREMIUM HEADER ═══ -->
+    <header class="main-header">
+        <div class="header-container">
+            <!-- Logo & Brand -->
+            <a class="logo-brand" asp-area="" asp-controller="Products" asp-action="Index">
+                <span class="logo-glow"></span>
+                <img src="~/imager/logo.png" alt="Viễn Thông Gia Trí" 
+                     style="height: 44px; width: auto; object-fit: contain; z-index: 1; border-radius: 8px; filter: drop-shadow(0 2px 10px rgba(0, 118, 247, 0.12));" 
+                     asp-append-version="true" />
+                <span class="brand-text ms-1" style="font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.15rem; color: var(--text-primary); letter-spacing: -0.02em;">
+                    Viễn Thông <span class="highlight">Gia Trí</span>
+                </span>
+            </a>
+            
+            <!-- Navigation -->
+            <nav class="nav-links">
+                <a class="nav-link-custom @(ViewContext.RouteData.Values["controller"]?.ToString() == "Products" ? "active" : "")" asp-area="" asp-controller="Products" asp-action="Index">
+                    <i class="fa-solid fa-store nav-icon"></i> Cửa hàng
+                </a>
+            </nav>
+            
+            <!-- User Actions -->
+            <div class="user-profile-sec">
+                <!-- Cart Link -->
+                <a asp-controller="Cart" asp-action="Index" class="btn-cart-header" title="Giỏ hàng của bạn">
+                    <div class="cart-icon-wrapper">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span class="cart-badge" id="cartBadgeCount">@cartCount</span>
+                    </div>
+                </a>
+
+                <!-- Theme Toggle -->
+                <button id="themeToggleBtn" class="btn-theme-toggle" title="Chuyển giao diện sáng/tối">
+                    <i class="fa-regular fa-moon theme-icon-dark"></i>
+                    <i class="fa-regular fa-sun theme-icon-light" style="display: none;"></i>
+                </button>
+
+                @if (User.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="btn-secondary-custom" style="font-size: 0.82rem; padding: 0.38rem 0.8rem;">
+                            <i class="fa-solid fa-shield-halved" style="color: var(--brand-cyan);"></i> Quản trị
+                        </a>
+                    }
+
+                    <div class="notification-badge">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="badge-dot"></span>
+                    </div>
+
+                    <div class="user-avatar-wrapper">
+                        <div class="avatar-glow"></div>
+                        <span class="user-avatar-initials">@User.Identity.Name?.Substring(0, 2).ToUpper()</span>
+                    </div>
+
+                    <form asp-controller="Account" asp-action="Logout" method="post" style="margin: 0;">
+                        <button type="submit" class="btn-secondary-custom" style="font-size: 0.8rem; padding: 0.38rem 0.8rem;">
+                            <i class="fa-solid fa-right-from-bracket"></i> Thoát
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="btn-secondary-custom" style="font-size: 0.82rem; padding: 0.4rem 0.9rem; text-decoration: none;">
+                        <i class="fa-solid fa-right-to-bracket"></i> Đăng nhập
+                    </a>
+                    <a asp-controller="Account" asp-action="Register" class="btn-primary-custom" style="font-size: 0.82rem; padding: 0.4rem 0.9rem; text-decoration: none;">
+                        <i class="fa-solid fa-user-plus"></i> Đăng ký
+                    </a>
+                }
+            </div>
+        </div>
+    </header>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div class="app-container">
+        <main role="main" class="main-content">
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- ═══ PREMIUM FOOTER ═══ -->
+    <footer class="main-footer py-5" style="background: linear-gradient(180deg, #0d2137, #071525); border-top: 1px solid rgba(0, 180, 255, 0.06);">
+        <div class="app-container py-3">
+            <div class="row g-4">
+                <!-- Company Info -->
+                <div class="col-lg-5 col-md-12">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <img src="~/imager/logo.png" alt="Gia Trí" style="height: 36px; width: auto; border-radius: 6px; filter: brightness(1.1);" asp-append-version="true" />
+                        <h5 class="fw-bold mb-0" style="font-family: 'Outfit', sans-serif; color: #f0f6fc; font-size: 1.05rem;">
+                            VIỄN THÔNG GIA TRÍ
+                        </h5>
+                    </div>
+                    <p class="mb-2" style="font-size: 0.85rem; color: #8ba3c1; line-height: 1.7;">
+                        <i class="fa-solid fa-location-dot me-2" style="color: #00b4ff;"></i>C4/26 HR3 Đường C4, ấp 4, Phạm Hùng, Xã Bình Hưng, Huyện Bình Chánh, TP.HCM
+                    </p>
+                    <p class="mb-2" style="font-size: 0.85rem; color: #8ba3c1;">
+                        <i class="fa-solid fa-barcode me-2" style="color: #00b4ff;"></i><strong>MST:</strong> 0317656136
+                    </p>
+                    <p class="mb-0" style="font-size: 0.85rem; color: #8ba3c1;">
+                        <i class="fa-solid fa-circle-check me-2" style="color: #10b981;"></i>Chuyên cung cấp Camera, Switch, Router & thiết bị mạng chính hãng.
+                    </p>
+                </div>
+
+                <!-- Product Links -->
+                <div class="col-lg-3 col-md-6 col-sm-6">
+                    <h6 class="fw-bold text-uppercase mb-3" style="font-family: 'Outfit', sans-serif; font-size: 0.78rem; letter-spacing: 0.08em; color: #00b4ff;">Sản phẩm</h6>
+                    <ul class="list-unstyled mb-0" style="font-size: 0.85rem; line-height: 2.2;">
+                        <li><a href="/Products?category=Camera Giám Sát" class="text-decoration-none" style="color: #8ba3c1; transition: all 0.2s;" onmouseover="this.style.color='#00b4ff'" onmouseout="this.style.color='#8ba3c1'"><i class="fa-solid fa-video me-2" style="font-size: 0.75rem; opacity: 0.6;"></i>Camera Giám Sát</a></li>
+                        <li><a href="/Products?category=Thiết Bị Switch" class="text-decoration-none" style="color: #8ba3c1; transition: all 0.2s;" onmouseover="this.style.color='#00b4ff'" onmouseout="this.style.color='#8ba3c1'"><i class="fa-solid fa-network-wired me-2" style="font-size: 0.75rem; opacity: 0.6;"></i>Thiết Bị Switch</a></li>
+                        <li><a href="/Products?category=Thiết Bị Mạng và Phụ Kiện" class="text-decoration-none" style="color: #8ba3c1; transition: all 0.2s;" onmouseover="this.style.color='#00b4ff'" onmouseout="this.style.color='#8ba3c1'"><i class="fa-solid fa-wifi me-2" style="font-size: 0.75rem; opacity: 0.6;"></i>Thiết Bị Mạng & Phụ Kiện</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="col-lg-4 col-md-6 col-sm-6">
+                    <h6 class="fw-bold text-uppercase mb-3" style="font-family: 'Outfit', sans-serif; font-size: 0.78rem; letter-spacing: 0.08em; color: #00b4ff;">Hỗ trợ</h6>
+                    <ul class="list-unstyled mb-0" style="font-size: 0.85rem; line-height: 2.2;">
+                        <li><span style="color: #8ba3c1;"><i class="fa-solid fa-phone me-2" style="color: #10b981;"></i>Hotline: <strong style="color: #f0f6fc;">0317 656 136</strong></span></li>
+                        <li><a href="#" class="text-decoration-none" style="color: #8ba3c1; transition: all 0.2s;" onmouseover="this.style.color='#00b4ff'" onmouseout="this.style.color='#8ba3c1'"><i class="fa-solid fa-shield-check me-2" style="font-size: 0.75rem; opacity: 0.6;"></i>Chính sách bảo hành</a></li>
+                        <li><a href="#" class="text-decoration-none" style="color: #8ba3c1; transition: all 0.2s;" onmouseover="this.style.color='#00b4ff'" onmouseout="this.style.color='#8ba3c1'"><i class="fa-solid fa-headset me-2" style="font-size: 0.75rem; opacity: 0.6;"></i>Hỗ trợ kỹ thuật</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <hr class="my-4" style="border-color: rgba(0, 180, 255, 0.08);">
+            
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center" style="font-size: 0.78rem; color: #4a6b8a;">
+                <span>&copy; 2026 Công Ty TNHH TM DV Viễn Thông Gia Trí. All rights reserved.</span>
+                <span class="mt-2 mt-sm-0">
+                    <i class="fa-solid fa-code me-1" style="color: #00b4ff; font-size: 0.7rem;"></i>Thiết kế bởi Gia Trí Telecom
+                </span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

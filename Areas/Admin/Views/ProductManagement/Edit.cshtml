@@ -1,0 +1,466 @@
+@model AspNetMvcApp.Models.Product
+@{
+    ViewData["Title"] = "Sửa Sản Phẩm";
+}
+
+<style>
+    .form-page-header {
+        margin-bottom: 2rem;
+    }
+
+    .form-page-header h1 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .form-page-header p {
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+    }
+
+    .form-card {
+        background: var(--bg-dark-card);
+        border: 1px solid var(--border-light);
+        border-radius: 20px;
+        padding: 2rem;
+        max-width: 700px;
+        backdrop-filter: var(--glass-blur);
+    }
+
+    .form-group {
+        margin-bottom: 1.35rem;
+    }
+
+    .form-label {
+        display: block;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 0.4rem;
+    }
+
+    .form-control-custom {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-light);
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        outline: none;
+        transition: var(--transition-normal);
+    }
+
+    .form-control-custom:focus {
+        border-color: rgba(59, 130, 246, 0.5);
+        background: rgba(255, 255, 255, 0.06);
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.12);
+    }
+
+    .form-control-custom option {
+        background: #0f1424;
+        color: var(--text-primary);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-check-custom {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .form-check-custom input {
+        accent-color: var(--accent-blue);
+        width: 16px;
+        height: 16px;
+    }
+
+    .form-check-custom label {
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1.75rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--border-light);
+    }
+
+    .btn-submit {
+        background: var(--grad-primary);
+        border: none;
+        color: #fff;
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        font-family: 'Outfit', sans-serif;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: var(--transition-fast);
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-cancel {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border-light);
+        color: var(--text-primary);
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        font-family: 'Outfit', sans-serif;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: var(--transition-fast);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text-primary);
+    }
+
+    .validation-error {
+        color: #ef4444;
+        font-size: 0.78rem;
+        margin-top: 0.3rem;
+    }
+
+    .edit-product-preview {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-light);
+        border-radius: 12px;
+    }
+
+    .edit-product-preview img {
+        width: 56px;
+        height: 56px;
+        object-fit: contain;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 4px;
+    }
+
+    .edit-product-preview-info {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .edit-product-preview-info strong {
+        color: var(--text-primary);
+        font-family: 'Outfit', sans-serif;
+        display: block;
+        margin-bottom: 0.15rem;
+    }
+
+    .image-card {
+        position: relative;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 10px;
+        border-radius: 12px;
+        border: 1px solid var(--border-light);
+        transition: all 0.2s ease;
+    }
+
+    .image-card:hover {
+        background: rgba(255, 255, 255, 0.03);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-delete-img {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        background: #ef4444;
+        color: #fff !important;
+        border: none;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 10px;
+        opacity: 0.85;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        z-index: 10;
+    }
+
+    .btn-delete-img:hover {
+        opacity: 1;
+        transform: scale(1.15);
+        background: #dc2626;
+    }
+</style>
+
+<div class="form-page-header">
+    <h1><i class="fa-solid fa-pen-to-square" style="color: var(--accent-blue);"></i> Sửa Sản Phẩm</h1>
+    <p>Cập nhật thông tin sản phẩm bên dưới.</p>
+</div>
+
+<div class="form-card">
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+        <input type="hidden" asp-for="Id" />
+        
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label class="form-label">Hình ảnh hiện tại (Chọn để làm ảnh chính)</label>
+            <div id="deletedImagesContainer"></div>
+            <div class="form-row" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; background: rgba(255, 255, 255, 0.02); padding: 1rem; border-radius: 10px; border: 1px solid var(--border-light);">
+                @if (!string.IsNullOrEmpty(Model.ImagePath))
+                {
+                    <div class="image-card">
+                        <button type="button" class="btn-delete-img" onclick="deleteExistingImage('@Model.ImagePath', this)" title="Xóa ảnh">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                        <img src="~/product/imges/@Model.ImagePath" alt="Main" onerror="this.onerror=null; if(this.src.indexOf('/product/imges/') !== -1) { this.src = this.src.replace('/product/imges/', '/imager/'); }" style="width: 100%; height: 80px; object-fit: contain; margin-bottom: 10px;" />
+                        <div class="form-check-custom" style="justify-content: center;">
+                            <input type="radio" name="mainImage" id="main_existing" value="@Model.ImagePath" checked />
+                            <label for="main_existing">Ảnh chính</label>
+                        </div>
+                    </div>
+                }
+                @if (Model.ProductImages != null && Model.ProductImages.Any())
+                {
+                    int imgIdx = 0;
+                    foreach (var img in Model.ProductImages)
+                    {
+                        <div class="image-card">
+                            <button type="button" class="btn-delete-img" onclick="deleteExistingImage('@img.ImagePath', this)" title="Xóa ảnh">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                            <img src="~/product/imges/@img.ImagePath" alt="Other" onerror="this.onerror=null; if(this.src.indexOf('/product/imges/') !== -1) { this.src = this.src.replace('/product/imges/', '/imager/'); }" style="width: 100%; height: 80px; object-fit: contain; margin-bottom: 10px;" />
+                            <div class="form-check-custom" style="justify-content: center;">
+                                <input type="radio" name="mainImage" id="other_existing_@imgIdx" value="@img.ImagePath" />
+                                <label for="other_existing_@imgIdx">Ảnh chính</label>
+                            </div>
+                        </div>
+                        imgIdx++;
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Name" class="form-label">Tên Sản Phẩm</label>
+            <input asp-for="Name" class="form-control-custom" />
+            <span asp-validation-for="Name" class="validation-error"></span>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label asp-for="CategoryId" class="form-label">Danh Mục</label>
+                <select asp-for="CategoryId" asp-items="@ViewBag.Categories" class="form-control-custom"></select>
+                <span asp-validation-for="CategoryId" class="validation-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Price" class="form-label">Giá (USD)</label>
+                <input asp-for="Price" class="form-control-custom" type="number" step="0.01" />
+                <span asp-validation-for="Price" class="validation-error"></span>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label asp-for="Rating" class="form-label">Đánh Giá (0 - 5)</label>
+                <input asp-for="Rating" class="form-control-custom" type="number" step="0.1" min="0" max="5" />
+                <span asp-validation-for="Rating" class="validation-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="StockStatus" class="form-label">Trạng Thái Kho</label>
+                <select asp-for="StockStatus" class="form-control-custom">
+                    <option value="InStock">Còn hàng</option>
+                    <option value="LowStock">Sắp hết hàng</option>
+                    <option value="OutOfStock">Hết hàng</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Tải lên hình ảnh mới</label>
+            <input type="file" id="uploadImages" name="uploadImages" multiple accept="image/*" class="form-control-custom" />
+            <small style="color: var(--text-secondary); display: block; margin-top: 0.2rem;">Bạn có thể tải thêm nhiều ảnh. Nếu muốn dùng ảnh mới làm ảnh chính, hãy chọn bên dưới.</small>
+        </div>
+
+        <div id="imagePreviewContainer" style="display: none; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-bottom: 1.35rem; background: rgba(255, 255, 255, 0.02); padding: 1rem; border-radius: 10px; border: 1px solid var(--border-light);">
+            <!-- Image previews will be injected here -->
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Description" class="form-label">Mô Tả</label>
+            <textarea asp-for="Description" class="form-control-custom" rows="4"></textarea>
+            <span asp-validation-for="Description" class="validation-error"></span>
+        </div>
+
+        <div class="form-check-custom">
+            <input asp-for="IsFeatured" type="checkbox" />
+            <label asp-for="IsFeatured">Sản phẩm nổi bật</label>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">
+                <i class="fa-solid fa-floppy-disk"></i> Lưu Thay Đổi
+            </button>
+            <a asp-action="Index" class="btn-cancel">
+                <i class="fa-solid fa-xmark"></i> Hủy
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+    let selectedFiles = [];
+
+    document.getElementById('uploadImages').addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        selectedFiles = selectedFiles.concat(files);
+        updatePreviewsAndInput();
+    });
+
+    function updatePreviewsAndInput() {
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        previewContainer.innerHTML = '';
+        
+        if (selectedFiles.length === 0) {
+            previewContainer.style.display = 'none';
+            document.getElementById('uploadImages').value = '';
+            return;
+        }
+
+        previewContainer.style.display = 'grid';
+        
+        const dt = new DataTransfer();
+        
+        selectedFiles.forEach((file, index) => {
+            dt.items.add(file);
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const div = document.createElement('div');
+                div.className = 'image-card';
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.type = 'button';
+                deleteBtn.className = 'btn-delete-img';
+                deleteBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                deleteBtn.title = 'Xóa ảnh';
+                deleteBtn.onclick = function() {
+                    selectedFiles.splice(index, 1);
+                    updatePreviewsAndInput();
+                    setTimeout(selectFirstAvailableMainImage, 50);
+                };
+                
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.width = '100%';
+                img.style.height = '80px';
+                img.style.objectFit = 'contain';
+                img.style.marginBottom = '10px';
+                
+                const radioContainer = document.createElement('div');
+                radioContainer.className = 'form-check-custom';
+                radioContainer.style.justifyContent = 'center';
+                
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'mainImage';
+                radio.value = file.name;
+                radio.id = 'new_mainImage_' + index;
+                
+                // If no main image is checked, check the first new preview by default
+                const hasMainChecked = isAnyMainImageChecked();
+                if (!hasMainChecked && index === 0) {
+                    radio.checked = true;
+                }
+                
+                const label = document.createElement('label');
+                label.htmlFor = 'new_mainImage_' + index;
+                label.innerText = 'Ảnh chính';
+                
+                radioContainer.appendChild(radio);
+                radioContainer.appendChild(label);
+                
+                div.appendChild(deleteBtn);
+                div.appendChild(img);
+                div.appendChild(radioContainer);
+                
+                previewContainer.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        document.getElementById('uploadImages').files = dt.files;
+    }
+
+    function isAnyMainImageChecked() {
+        const radios = document.querySelectorAll('input[name="mainImage"]');
+        for (let r of radios) {
+            const card = r.closest('.image-card');
+            if (card && card.style.display !== 'none' && r.checked) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function deleteExistingImage(imagePath, btn) {
+        if (confirm("Bạn có chắc chắn muốn xóa ảnh này?")) {
+            const container = document.getElementById('deletedImagesContainer');
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'deletedImages';
+            input.value = imagePath;
+            container.appendChild(input);
+
+            const card = btn.closest('.image-card');
+            card.style.display = 'none';
+
+            const radio = card.querySelector('input[type="radio"]');
+            if (radio && radio.checked) {
+                radio.checked = false;
+                selectFirstAvailableMainImage();
+            }
+        }
+    }
+
+    function selectFirstAvailableMainImage() {
+        // Find first visible card in existing images or new previews
+        const cards = document.querySelectorAll('.image-card');
+        for (let card of cards) {
+            if (card.style.display !== 'none') {
+                const radio = card.querySelector('input[type="radio"]');
+                if (radio) {
+                    radio.checked = true;
+                    return;
+                }
+            }
+        }
+    }
+</script>
