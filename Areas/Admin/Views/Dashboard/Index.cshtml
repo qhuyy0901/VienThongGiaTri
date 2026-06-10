@@ -190,6 +190,24 @@
         <div class="stat-item-value">@ViewBag.FeaturedProducts</div>
         <div class="stat-item-label">Sản Phẩm Nổi Bật</div>
     </div>
+
+    <div class="stat-item">
+        <div class="stat-item-glow" style="background: var(--accent-blue);"></div>
+        <div class="stat-item-icon" style="background: rgba(59, 130, 246, 0.12); color: var(--accent-blue);">
+            <i class="fa-solid fa-receipt"></i>
+        </div>
+        <div class="stat-item-value">@ViewBag.TotalOrders</div>
+        <div class="stat-item-label">Tổng Đơn Hàng</div>
+    </div>
+
+    <div class="stat-item">
+        <div class="stat-item-glow" style="background: var(--accent-orange);"></div>
+        <div class="stat-item-icon" style="background: rgba(249, 115, 22, 0.12); color: var(--accent-orange);">
+            <i class="fa-solid fa-clock"></i>
+        </div>
+        <div class="stat-item-value">@ViewBag.PendingOrders</div>
+        <div class="stat-item-label">Đơn Chờ Xử Lý</div>
+    </div>
 </div>
 
 <!-- Stock Overview -->
@@ -237,6 +255,16 @@
         <div class="quick-action-text">
             <h3>Thêm Sản Phẩm Mới</h3>
             <p>Tạo một sản phẩm mới cho cửa hàng</p>
+        </div>
+    </a>
+
+    <a asp-area="Admin" asp-controller="OrderManagement" asp-action="Index" class="quick-action-card">
+        <div class="quick-action-icon" style="background: rgba(249, 115, 22, 0.12); color: var(--accent-orange);">
+            <i class="fa-solid fa-receipt"></i>
+        </div>
+        <div class="quick-action-text">
+            <h3>Quản Lý Đơn Hàng</h3>
+            <p>Xem chi tiết đơn, lọc trạng thái và cập nhật xử lý</p>
         </div>
     </a>
 

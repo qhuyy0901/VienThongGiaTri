@@ -15,10 +15,10 @@ namespace AspNetMvcApp.Areas.Admin.Controllers;
 [Authorize(Roles = "Admin")]
 public class AccountManagementController : Controller
 {
-    private readonly UserManager<IdentityUser> _userManager;
+    private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
 
-    public AccountManagementController(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
+    public AccountManagementController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager)
     {
         _userManager = userManager;
         _roleManager = roleManager;
@@ -31,7 +31,7 @@ public class AccountManagementController : Controller
         if (pageNumber < 1) pageNumber = 1;
         int pageSize = 10;
 
-        IQueryable<IdentityUser> query = _userManager.Users;
+        IQueryable<AppUser> query = _userManager.Users;
 
         if (!string.IsNullOrEmpty(searchTerm))
         {
@@ -93,7 +93,7 @@ public class AccountManagementController : Controller
                 return View(model);
             }
 
-            var user = new IdentityUser
+            var user = new AppUser
             {
                 UserName = model.Email.Trim(),
                 Email = model.Email.Trim(),

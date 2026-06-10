@@ -11,9 +11,9 @@ namespace AspNetMvcApp.Areas.Admin.Controllers;
 public class DashboardController : Controller
 {
     private readonly AppDbContext _context;
-    private readonly UserManager<IdentityUser> _userManager;
+    private readonly UserManager<AppUser> _userManager;
 
-    public DashboardController(AppDbContext context, UserManager<IdentityUser> userManager)
+    public DashboardController(AppDbContext context, UserManager<AppUser> userManager)
     {
         _context = context;
         _userManager = userManager;
@@ -24,6 +24,8 @@ public class DashboardController : Controller
         ViewBag.TotalProducts = await _context.Products.CountAsync();
         ViewBag.TotalCategories = await _context.Categories.CountAsync();
         ViewBag.TotalUsers = _userManager.Users.Count();
+        ViewBag.TotalOrders = await _context.Orders.CountAsync();
+        ViewBag.PendingOrders = await _context.Orders.CountAsync(o => o.Status == "Pending");
         ViewBag.InStockProducts = await _context.Products.CountAsync(p => p.StockStatus == "InStock");
         ViewBag.LowStockProducts = await _context.Products.CountAsync(p => p.StockStatus == "LowStock");
         ViewBag.OutOfStockProducts = await _context.Products.CountAsync(p => p.StockStatus == "OutOfStock");

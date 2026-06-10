@@ -1,6 +1,6 @@
 @model AspNetMvcApp.Models.LoginViewModel
 @{
-    ViewData["Title"] = "Đăng Nhập";
+    ViewData["Title"] = "Đăng nhập";
 }
 
 <style>
@@ -15,8 +15,8 @@
     .auth-card {
         background: var(--bg-dark-card);
         border: 1px solid var(--border-light);
-        border-radius: 24px;
-        padding: 3rem;
+        border-radius: 20px;
+        padding: 2.5rem;
         width: 100%;
         max-width: 460px;
         backdrop-filter: var(--glass-blur);
@@ -29,19 +29,23 @@
     .auth-card::before {
         content: '';
         position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle at 30% 20%, rgba(0, 118, 247, 0.06) 0%, transparent 50%),
-                    radial-gradient(circle at 70% 80%, rgba(0, 180, 255, 0.04) 0%, transparent 50%);
+        inset: -50%;
+        background: radial-gradient(circle at 30% 20%, rgba(0, 118, 247, 0.06), transparent 46%),
+                    radial-gradient(circle at 72% 82%, rgba(0, 180, 255, 0.04), transparent 48%);
         pointer-events: none;
+    }
+
+    .auth-header,
+    .auth-card form,
+    .auth-divider,
+    .auth-footer,
+    .alert-error {
+        position: relative;
     }
 
     .auth-header {
         text-align: center;
         margin-bottom: 2rem;
-        position: relative;
     }
 
     .auth-icon {
@@ -69,11 +73,11 @@
     .auth-subtitle {
         color: var(--text-secondary);
         font-size: 0.9rem;
+        margin: 0;
     }
 
     .auth-form-group {
-        margin-bottom: 1.35rem;
-        position: relative;
+        margin-bottom: 1.25rem;
     }
 
     .auth-label {
@@ -107,14 +111,11 @@
     }
 
     .auth-check-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
         margin-bottom: 1.5rem;
     }
 
     .auth-check-label {
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: 0.5rem;
         color: var(--text-secondary);
@@ -129,48 +130,37 @@
         cursor: pointer;
     }
 
-    .auth-btn {
+    .auth-btn,
+    .social-btn {
         width: 100%;
-        background: linear-gradient(135deg, #0076f7, #00b4ff);
-        border: none;
-        color: #fff;
-        padding: 0.9rem;
-        font-size: 1rem;
-        font-weight: 600;
-        font-family: 'Outfit', sans-serif;
         border-radius: 12px;
+        padding: 0.9rem 1rem;
+        font-weight: 600;
+        font-size: 0.95rem;
         cursor: pointer;
         transition: var(--transition-fast);
-        box-shadow: 0 4px 20px rgba(0, 118, 247, 0.3);
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem;
+        gap: 0.65rem;
+    }
+
+    .auth-btn {
+        background: linear-gradient(135deg, #0076f7, #00b4ff);
+        border: none;
+        color: #fff;
+        font-family: 'Outfit', sans-serif;
+        box-shadow: 0 4px 20px rgba(0, 118, 247, 0.3);
+    }
+
+    .auth-btn:hover,
+    .social-btn:hover {
+        transform: translateY(-2px);
     }
 
     .auth-btn:hover {
-        transform: translateY(-2px);
         box-shadow: 0 8px 30px rgba(0, 118, 247, 0.45);
         filter: brightness(1.05);
-    }
-
-    .auth-footer {
-        text-align: center;
-        margin-top: 1.75rem;
-        color: var(--text-secondary);
-        font-size: 0.9rem;
-        position: relative;
-    }
-
-    .auth-footer a {
-        color: #00b4ff;
-        text-decoration: none;
-        font-weight: 600;
-        transition: var(--transition-fast);
-    }
-
-    .auth-footer a:hover {
-        color: #0076f7;
     }
 
     .auth-divider {
@@ -178,7 +168,6 @@
         align-items: center;
         gap: 1rem;
         margin: 1.5rem 0;
-        position: relative;
     }
 
     .auth-divider::before,
@@ -192,15 +181,47 @@
     .auth-divider span {
         color: var(--text-muted);
         font-size: 0.8rem;
+        white-space: nowrap;
+    }
+
+    .social-btn {
+        margin-bottom: 0.75rem;
+        border: 1px solid var(--border-light);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-primary);
+    }
+
+    .social-btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .social-btn.google i {
+        color: #ea4335;
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 1.75rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .auth-footer a {
+        color: #00b4ff;
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition-fast);
+    }
+
+    .auth-footer a:hover {
+        color: #0076f7;
     }
 
     .validation-error {
         color: #ef4444;
         font-size: 0.8rem;
         margin-top: 0.35rem;
-        display: flex;
-        align-items: center;
-        gap: 0.3rem;
+        display: block;
     }
 
     .alert-error {
@@ -211,10 +232,16 @@
         color: #ef4444;
         font-size: 0.85rem;
         margin-bottom: 1.25rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        position: relative;
+    }
+
+    @@media (max-width: 575.98px) {
+        .auth-container {
+            padding: 1rem;
+        }
+
+        .auth-card {
+            padding: 1.5rem;
+        }
     }
 </style>
 
@@ -224,15 +251,13 @@
             <div class="auth-icon">
                 <i class="fa-solid fa-right-to-bracket"></i>
             </div>
-            <h1 class="auth-title">Chào Mừng Trở Lại</h1>
+            <h1 class="auth-title">Chào mừng trở lại</h1>
             <p class="auth-subtitle">Đăng nhập vào tài khoản Viễn Thông Gia Trí của bạn</p>
         </div>
 
         @if (!ViewData.ModelState.IsValid)
         {
-            <div asp-validation-summary="All" class="alert-error">
-                <i class="fa-solid fa-circle-exclamation"></i>
-            </div>
+            <div asp-validation-summary="All" class="alert-error"></div>
         }
 
         <form method="post" asp-action="Login" asp-controller="Account">
@@ -259,16 +284,27 @@
 
             <button type="submit" class="auth-btn">
                 <i class="fa-solid fa-arrow-right-to-bracket"></i>
-                Đăng Nhập
+                Đăng nhập
             </button>
         </form>
 
         <div class="auth-divider">
-            <span>hoặc</span>
+            <span>hoặc tiếp tục với</span>
         </div>
 
+        <form method="post" asp-action="ExternalLogin" asp-controller="Account" asp-route-returnUrl="@ViewData["ReturnUrl"]">
+            <button type="submit" name="provider" value="Google" class="social-btn google">
+                <i class="fa-brands fa-google"></i>
+                Google
+            </button>
+        </form>
+
         <div class="auth-footer">
-            Chưa có tài khoản? <a asp-action="Register" asp-controller="Account">Đăng ký ngay</a>
+            Chưa có tài khoản? <a asp-action="Register" asp-controller="Account" asp-route-returnUrl="@ViewData["ReturnUrl"]">Đăng ký ngay</a>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

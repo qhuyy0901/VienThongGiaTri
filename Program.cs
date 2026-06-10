@@ -21,8 +21,12 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Register Chatbot Service
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<AspNetMvcApp.Services.IChatbotService, AspNetMvcApp.Services.ChatbotService>();
+
 // Configure ASP.NET Core Identity
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
     // Password settings (relaxed for development)
     options.Password.RequireDigit = true;
@@ -36,6 +40,23 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
+
+// Configure Google Authentication
+builder.Services.AddAuthentication()
+    .AddGoogle(options =>
+    {
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
+        options.CallbackPath = "/signin-google";
+        options.Scope.Add("email");
+        options.Scope.Add("profile");
+        options.Events.OnRemoteFailure = context =>
+        {
+            context.Response.Redirect("/Account/Login?externalError=Google");
+            context.HandleResponse();
+            return Task.CompletedTask;
+        };
+    });
 
 // Configure application cookie
 builder.Services.ConfigureApplicationCookie(options =>
@@ -58,8 +79,19 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<AppDbContext>();
         context.Database.EnsureCreated();
 
+        var hasFullNameColumn = await context.Database
+            .SqlQueryRaw<int>("SELECT COUNT(*) AS Value FROM sys.columns WHERE object_id = OBJECT_ID(N'AspNetUsers') AND name = N'FullName'")
+            .SingleAsync();
+
+        if (hasFullNameColumn == 0)
+        {
+            await context.Database.ExecuteSqlRawAsync("ALTER TABLE AspNetUsers ADD FullName NVARCHAR(MAX) NULL;");
+        }
+
+        await EnsureOrderTablesAsync(context);
+
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+        var userManager = services.GetRequiredService<UserManager<AppUser>>();
 
         // Create Roles
         string[] roles = { "Admin", "User" };
@@ -75,10 +107,11 @@ using (var scope = app.Services.CreateScope())
         var adminEmail = "admin@huy.com";
         if (await userManager.FindByEmailAsync(adminEmail) == null)
         {
-            var adminUser = new IdentityUser
+            var adminUser = new AppUser
             {
                 UserName = adminEmail,
                 Email = adminEmail,
+                FullName = "Administrator",
                 EmailConfirmed = true
             };
             var result = await userManager.CreateAsync(adminUser, "Admin@123");
@@ -92,10 +125,11 @@ using (var scope = app.Services.CreateScope())
         var userEmail = "user@huy.com";
         if (await userManager.FindByEmailAsync(userEmail) == null)
         {
-            var regularUser = new IdentityUser
+            var regularUser = new AppUser
             {
                 UserName = userEmail,
                 Email = userEmail,
+                FullName = "Huy Nguyen",
                 EmailConfirmed = true
             };
             var result = await userManager.CreateAsync(regularUser, "User@123");
@@ -148,3 +182,50 @@ app.MapControllers();
 
 
 app.Run();
+
+static async Task EnsureOrderTablesAsync(AppDbContext context)
+{
+    await context.Database.ExecuteSqlRawAsync("""
+        IF OBJECT_ID(N'[Orders]', N'U') IS NULL
+        BEGIN
+            CREATE TABLE [Orders] (
+                [Id] INT IDENTITY(1,1) NOT NULL CONSTRAINT [PK_Orders] PRIMARY KEY,
+                [OrderNumber] NVARCHAR(32) NOT NULL,
+                [UserId] NVARCHAR(450) NULL,
+                [CustomerName] NVARCHAR(200) NOT NULL,
+                [Phone] NVARCHAR(50) NOT NULL,
+                [Address] NVARCHAR(500) NOT NULL,
+                [PaymentMethod] NVARCHAR(100) NOT NULL,
+                [Notes] NVARCHAR(MAX) NOT NULL,
+                [TotalAmount] DECIMAL(18,2) NOT NULL,
+                [Status] NVARCHAR(50) NOT NULL,
+                [CreatedAt] DATETIME2 NOT NULL,
+                [UpdatedAt] DATETIME2 NOT NULL
+            );
+
+            CREATE UNIQUE INDEX [IX_Orders_OrderNumber] ON [Orders] ([OrderNumber]);
+            CREATE INDEX [IX_Orders_Status] ON [Orders] ([Status]);
+            CREATE INDEX [IX_Orders_CreatedAt] ON [Orders] ([CreatedAt]);
+        END
+        """);
+
+    await context.Database.ExecuteSqlRawAsync("""
+        IF OBJECT_ID(N'[OrderItems]', N'U') IS NULL
+        BEGIN
+            CREATE TABLE [OrderItems] (
+                [Id] INT IDENTITY(1,1) NOT NULL CONSTRAINT [PK_OrderItems] PRIMARY KEY,
+                [OrderId] INT NOT NULL,
+                [ProductId] INT NULL,
+                [ProductName] NVARCHAR(300) NOT NULL,
+                [UnitPrice] DECIMAL(18,2) NOT NULL,
+                [Quantity] INT NOT NULL,
+                [ImagePath] NVARCHAR(500) NOT NULL,
+                CONSTRAINT [FK_OrderItems_Orders_OrderId] FOREIGN KEY ([OrderId]) REFERENCES [Orders] ([Id]) ON DELETE CASCADE,
+                CONSTRAINT [FK_OrderItems_Products_ProductId] FOREIGN KEY ([ProductId]) REFERENCES [Products] ([Id]) ON DELETE SET NULL
+            );
+
+            CREATE INDEX [IX_OrderItems_OrderId] ON [OrderItems] ([OrderId]);
+            CREATE INDEX [IX_OrderItems_ProductId] ON [OrderItems] ([ProductId]);
+        END
+        """);
+}

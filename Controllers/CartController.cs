@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace AspNetMvcApp.Controllers;
 
@@ -327,14 +328,43 @@ public class CartController : Controller
                 }
             }
 
+            var orderNumber = "GT-" + DateTime.Now.ToString("yyMMddHHmmss") + "-" + Random.Shared.Next(100, 999);
+            var paymentMethod = model.PaymentMethod == "BankTransfer" ? "Chuyển khoản ngân hàng" : "Thanh toán COD (khi nhận hàng)";
+
+            var order = new Order
+            {
+                OrderNumber = orderNumber,
+                UserId = User.Identity?.IsAuthenticated == true ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null,
+                CustomerName = model.FullName.Trim(),
+                Phone = model.Phone.Trim(),
+                Address = model.Address.Trim(),
+                PaymentMethod = paymentMethod,
+                Notes = model.Notes?.Trim() ?? string.Empty,
+                TotalAmount = totalAmount,
+                Status = "Pending",
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now,
+                Items = purchasedItems.Select(item => new OrderItem
+                {
+                    ProductId = item.ProductId,
+                    ProductName = item.Name,
+                    UnitPrice = item.Price,
+                    Quantity = item.Quantity,
+                    ImagePath = item.ImagePath
+                }).ToList()
+            };
+
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
+
             // Create Order Receipt
             var receipt = new OrderReceiptViewModel
             {
-                OrderId = "GT-" + new Random().Next(100000, 999999),
+                OrderId = orderNumber,
                 FullName = model.FullName.Trim(),
                 Phone = model.Phone.Trim(),
                 Address = model.Address.Trim(),
-                PaymentMethod = model.PaymentMethod == "BankTransfer" ? "Chuyển khoản ngân hàng" : "Thanh toán COD (khi nhận hàng)",
+                PaymentMethod = paymentMethod,
                 Notes = model.Notes?.Trim() ?? string.Empty,
                 Items = purchasedItems,
                 TotalAmount = totalAmount,

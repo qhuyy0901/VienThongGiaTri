@@ -232,6 +232,26 @@
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         }
 
+        .toast-error {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 12px;
+            padding: 0.85rem 1.25rem;
+            color: #ef4444;
+            font-size: 0.88rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            z-index: 9999;
+            animation: slideInRight 0.35s ease, fadeOut 0.5s 3s forwards;
+            backdrop-filter: var(--glass-blur);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
         @@keyframes slideInRight {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
@@ -248,6 +268,13 @@
         <div class="toast-success">
             <i class="fa-solid fa-circle-check"></i>
             @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="toast-error">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            @TempData["ErrorMessage"]
         </div>
     }
 
@@ -282,6 +309,12 @@
                    class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "CategoryManagement" ? "active" : "")">
                     <i class="fa-solid fa-folder-open"></i>
                     Danh Mục
+                </a>
+
+                <a asp-area="Admin" asp-controller="OrderManagement" asp-action="Index"
+                   class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "OrderManagement" ? "active" : "")">
+                    <i class="fa-solid fa-receipt"></i>
+                    Đơn hàng
                 </a>
 
                 <a asp-area="Admin" asp-controller="AccountManagement" asp-action="Index"

@@ -1,0 +1,300 @@
+@model List<AspNetMvcApp.Models.Order>
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+    var currentPage = (int)(ViewBag.CurrentPage ?? 1);
+    var totalPages = (int)(ViewBag.TotalPages ?? 1);
+    var searchTerm = ViewBag.SearchTerm as string;
+    var selectedStatus = ViewBag.Status as string;
+    var statuses = ViewBag.Statuses as string[] ?? Array.Empty<string>();
+}
+
+@functions {
+    string StatusText(string status) => status switch
+    {
+        "Pending" => "Chờ xử lý",
+        "Processing" => "Đang xử lý",
+        "Completed" => "Hoàn thành",
+        "Cancelled" => "Đã hủy",
+        _ => status
+    };
+
+    string StatusClass(string status) => status switch
+    {
+        "Pending" => "status-pending",
+        "Processing" => "status-processing",
+        "Completed" => "status-completed",
+        "Cancelled" => "status-cancelled",
+        _ => "status-pending"
+    };
+}
+
+<style>
+    .page-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .page-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.55rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .page-subtitle {
+        color: var(--text-secondary);
+        margin: 0.25rem 0 0;
+        font-size: 0.9rem;
+    }
+
+    .filter-bar {
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) 190px auto;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .admin-input,
+    .admin-select {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border-light);
+        border-radius: 10px;
+        color: var(--text-primary);
+        padding: 0.75rem 0.9rem;
+        outline: none;
+        width: 100%;
+    }
+
+    .admin-select option {
+        color: #111827;
+    }
+
+    .admin-btn {
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        color: #fff;
+        background: linear-gradient(135deg, #0076f7, #00b4ff);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        white-space: nowrap;
+    }
+
+    .orders-table-wrap {
+        border: 1px solid var(--border-light);
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--bg-dark-card);
+    }
+
+    .orders-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .orders-table th,
+    .orders-table td {
+        padding: 0.95rem 1rem;
+        border-bottom: 1px solid var(--border-light);
+        vertical-align: middle;
+    }
+
+    .orders-table th {
+        color: var(--text-secondary);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-weight: 700;
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .orders-table td {
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .orders-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .order-code {
+        font-weight: 700;
+        color: #38bdf8;
+    }
+
+    .muted {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 0.3rem 0.65rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+    }
+
+    .status-pending { color: #f59e0b; background: rgba(245, 158, 11, 0.12); }
+    .status-processing { color: #38bdf8; background: rgba(56, 189, 248, 0.12); }
+    .status-completed { color: #10b981; background: rgba(16, 185, 129, 0.12); }
+    .status-cancelled { color: #ef4444; background: rgba(239, 68, 68, 0.12); }
+
+    .action-link {
+        color: #00b4ff;
+        text-decoration: none;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .empty-state {
+        padding: 3rem 1rem;
+        text-align: center;
+        color: var(--text-secondary);
+    }
+
+    .pager {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .pager a,
+    .pager span {
+        min-width: 38px;
+        height: 38px;
+        border-radius: 9px;
+        border: 1px solid var(--border-light);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    .pager .active {
+        color: #fff;
+        background: #0076f7;
+        border-color: #0076f7;
+    }
+
+    @@media (max-width: 900px) {
+        .filter-bar {
+            grid-template-columns: 1fr;
+        }
+
+        .orders-table-wrap {
+            overflow-x: auto;
+        }
+
+        .orders-table {
+            min-width: 860px;
+        }
+    }
+</style>
+
+<div class="page-head">
+    <div>
+        <h1 class="page-title">Quản lý đơn hàng</h1>
+        <p class="page-subtitle">@ViewBag.TotalOrders đơn hàng trong hệ thống</p>
+    </div>
+</div>
+
+<form method="get" class="filter-bar">
+    <input class="admin-input" type="text" name="searchTerm" value="@searchTerm" placeholder="Tìm mã đơn, khách hàng, số điện thoại..." />
+    <select class="admin-select" name="status">
+        <option value="">Tất cả trạng thái</option>
+        @foreach (var status in statuses)
+        {
+            <option value="@status" selected="@(selectedStatus == status)">@StatusText(status)</option>
+        }
+    </select>
+    <button class="admin-btn" type="submit">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        Lọc đơn
+    </button>
+</form>
+
+<div class="orders-table-wrap">
+    @if (Model.Any())
+    {
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th>Mã đơn</th>
+                    <th>Khách hàng</th>
+                    <th>Ngày đặt</th>
+                    <th>Sản phẩm</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="order-code">@order.OrderNumber</div>
+                            <div class="muted">#@order.Id</div>
+                        </td>
+                        <td>
+                            <div>@order.CustomerName</div>
+                            <div class="muted">@order.Phone</div>
+                        </td>
+                        <td>
+                            <div>@order.CreatedAt.ToString("dd/MM/yyyy")</div>
+                            <div class="muted">@order.CreatedAt.ToString("HH:mm")</div>
+                        </td>
+                        <td>@order.Items.Sum(i => i.Quantity)</td>
+                        <td>@((order.TotalAmount * 25000).ToString("#,##0")) ₫</td>
+                        <td><span class="status-badge @StatusClass(order.Status)">@StatusText(order.Status)</span></td>
+                        <td>
+                            <a class="action-link" asp-action="Details" asp-route-id="@order.Id">
+                                <i class="fa-solid fa-eye"></i>
+                                Chi tiết
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="fa-regular fa-clipboard" style="font-size: 2rem; margin-bottom: 0.75rem;"></i>
+            <div>Chưa có đơn hàng phù hợp.</div>
+        </div>
+    }
+</div>
+
+@if (totalPages > 1)
+{
+    <div class="pager">
+        @for (var i = 1; i <= totalPages; i++)
+        {
+            if (i == currentPage)
+            {
+                <span class="active">@i</span>
+            }
+            else
+            {
+                <a asp-action="Index" asp-route-page="@i" asp-route-searchTerm="@searchTerm" asp-route-status="@selectedStatus">@i</a>
+            }
+        }
+    </div>
+}

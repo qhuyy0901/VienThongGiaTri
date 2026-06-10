@@ -1,0 +1,325 @@
+@model AspNetMvcApp.Models.Order
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+    var statuses = ViewBag.Statuses as string[] ?? Array.Empty<string>();
+}
+
+@functions {
+    string StatusText(string status) => status switch
+    {
+        "Pending" => "Chờ xử lý",
+        "Processing" => "Đang xử lý",
+        "Completed" => "Hoàn thành",
+        "Cancelled" => "Đã hủy",
+        _ => status
+    };
+
+    string StatusClass(string status) => status switch
+    {
+        "Pending" => "status-pending",
+        "Processing" => "status-processing",
+        "Completed" => "status-completed",
+        "Cancelled" => "status-cancelled",
+        _ => "status-pending"
+    };
+}
+
+<style>
+    .details-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .back-link {
+        color: var(--text-secondary);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin-bottom: 0.6rem;
+        font-weight: 600;
+    }
+
+    .page-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.55rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 0.35rem 0.75rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .status-pending { color: #f59e0b; background: rgba(245, 158, 11, 0.12); }
+    .status-processing { color: #38bdf8; background: rgba(56, 189, 248, 0.12); }
+    .status-completed { color: #10b981; background: rgba(16, 185, 129, 0.12); }
+    .status-cancelled { color: #ef4444; background: rgba(239, 68, 68, 0.12); }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.6fr);
+        gap: 1rem;
+    }
+
+    .panel {
+        background: var(--bg-dark-card);
+        border: 1px solid var(--border-light);
+        border-radius: 12px;
+        padding: 1.25rem;
+    }
+
+    .panel-title {
+        color: var(--text-primary);
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-list {
+        display: grid;
+        gap: 0.85rem;
+    }
+
+    .info-row {
+        display: grid;
+        grid-template-columns: 120px minmax(0, 1fr);
+        gap: 1rem;
+        color: var(--text-primary);
+    }
+
+    .info-label {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .items-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .items-table th,
+    .items-table td {
+        padding: 0.9rem 0;
+        border-bottom: 1px solid var(--border-light);
+        vertical-align: middle;
+    }
+
+    .items-table th {
+        color: var(--text-secondary);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .product-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .product-thumb {
+        width: 54px;
+        height: 54px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 1px solid var(--border-light);
+        background: rgba(255, 255, 255, 0.04);
+    }
+
+    .product-name {
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+
+    .muted {
+        color: var(--text-muted);
+        font-size: 0.82rem;
+    }
+
+    .summary-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.6rem 0;
+        color: var(--text-secondary);
+    }
+
+    .summary-total {
+        border-top: 1px solid var(--border-light);
+        margin-top: 0.5rem;
+        padding-top: 1rem;
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        font-weight: 800;
+    }
+
+    .admin-select,
+    .admin-btn {
+        width: 100%;
+        border-radius: 10px;
+        padding: 0.75rem 0.9rem;
+    }
+
+    .admin-select {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border-light);
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+    }
+
+    .admin-select option {
+        color: #111827;
+    }
+
+    .admin-btn {
+        border: none;
+        color: #fff;
+        background: linear-gradient(135deg, #0076f7, #00b4ff);
+        font-weight: 700;
+    }
+
+    @@media (max-width: 980px) {
+        .details-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<a class="back-link" asp-action="Index">
+    <i class="fa-solid fa-arrow-left"></i>
+    Quay lại danh sách
+</a>
+
+<div class="details-head">
+    <div>
+        <h1 class="page-title">Đơn hàng @Model.OrderNumber</h1>
+        <div class="muted">Đặt lúc @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+    </div>
+    <span class="status-badge @StatusClass(Model.Status)">@StatusText(Model.Status)</span>
+</div>
+
+<div class="details-grid">
+    <div class="panel">
+        <div class="panel-title">
+            <i class="fa-solid fa-boxes-stacked"></i>
+            Sản phẩm trong đơn
+        </div>
+
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th>SL</th>
+                    <th>Đơn giá</th>
+                    <th style="text-align: right;">Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>
+                            <div class="product-cell">
+                                <img class="product-thumb" src="~/imager/@item.ImagePath" alt="@item.ProductName" asp-append-version="true" />
+                                <div>
+                                    <div class="product-name">@item.ProductName</div>
+                                    <div class="muted">Mã SP: @(item.ProductId?.ToString() ?? "N/A")</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>@item.Quantity</td>
+                        <td>@((item.UnitPrice * 25000).ToString("#,##0")) ₫</td>
+                        <td style="text-align: right;">@((item.TotalPrice * 25000).ToString("#,##0")) ₫</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div>
+        <div class="panel" style="margin-bottom: 1rem;">
+            <div class="panel-title">
+                <i class="fa-solid fa-user"></i>
+                Thông tin khách hàng
+            </div>
+
+            <div class="info-list">
+                <div class="info-row">
+                    <div class="info-label">Họ tên</div>
+                    <div>@Model.CustomerName</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Điện thoại</div>
+                    <div>@Model.Phone</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Địa chỉ</div>
+                    <div>@Model.Address</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Thanh toán</div>
+                    <div>@Model.PaymentMethod</div>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(Model.Notes))
+                {
+                    <div class="info-row">
+                        <div class="info-label">Ghi chú</div>
+                        <div>@Model.Notes</div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="panel" style="margin-bottom: 1rem;">
+            <div class="panel-title">
+                <i class="fa-solid fa-clipboard-check"></i>
+                Cập nhật trạng thái
+            </div>
+
+            <form asp-action="UpdateStatus" method="post">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <select class="admin-select" name="status">
+                    @foreach (var status in statuses)
+                    {
+                        <option value="@status" selected="@(Model.Status == status)">@StatusText(status)</option>
+                    }
+                </select>
+                <button class="admin-btn" type="submit">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Lưu trạng thái
+                </button>
+            </form>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">
+                <i class="fa-solid fa-receipt"></i>
+                Tổng kết
+            </div>
+            <div class="summary-row">
+                <span>Số lượng</span>
+                <strong>@Model.Items.Sum(i => i.Quantity)</strong>
+            </div>
+            <div class="summary-row">
+                <span>Tạm tính</span>
+                <strong>@((Model.TotalAmount * 25000).ToString("#,##0")) ₫</strong>
+            </div>
+            <div class="summary-row summary-total">
+                <span>Tổng cộng</span>
+                <span>@((Model.TotalAmount * 25000).ToString("#,##0")) ₫</span>
+            </div>
+        </div>
+    </div>
+</div>
